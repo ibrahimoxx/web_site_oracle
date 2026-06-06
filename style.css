@@ -36,6 +36,7 @@ body {
     radial-gradient(circle at top right, rgba(14, 90, 100, 0.14), transparent 24%),
     linear-gradient(180deg, #f8f4ed 0%, #f2ece2 50%, #efe8dd 100%);
   line-height: 1.65;
+  overflow-x: hidden;
 }
 
 a {
@@ -669,6 +670,7 @@ th {
 
 .mono {
   font-family: Consolas, "Courier New", monospace;
+  overflow-wrap: anywhere;
 }
 
 .code-block {
@@ -752,10 +754,13 @@ th {
   .columns,
   .grid-2,
   .grid-3,
-  .key-grid,
   .focus-grid,
   .command-grid {
     grid-template-columns: 1fr;
+  }
+
+  .key-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .topbar-inner,
@@ -763,9 +768,49 @@ th {
     align-items: flex-start;
     flex-direction: column;
   }
+
+  .hero-card,
+  .page-header-card {
+    padding: 30px;
+  }
 }
 
 @media (max-width: 680px) {
+  .page-shell,
+  .topbar-inner {
+    width: min(var(--max-width), calc(100% - 20px));
+  }
+
+  .topbar {
+    position: static;
+  }
+
+  .topbar-inner {
+    gap: 14px;
+    padding: 12px 0;
+  }
+
+  .brand-title {
+    font-size: 1.05rem;
+  }
+
+  .nav-links,
+  .page-anchor-nav,
+  .toc {
+    width: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    scrollbar-width: thin;
+  }
+
+  .nav-links a,
+  .page-anchor-nav a,
+  .tag-link {
+    white-space: nowrap;
+    flex: 0 0 auto;
+  }
+
   .hero-card,
   .page-header-card,
   .chapter-card,
@@ -773,13 +818,93 @@ th {
   .panel,
   .exercise-card {
     padding: 22px;
+    border-radius: 22px;
   }
 
   .hero {
-    padding-top: 36px;
+    padding: 32px 0 12px;
   }
 
-  .nav-links {
-    justify-content: flex-start;
+  .hero-card::before,
+  .hero-card::after {
+    display: none;
+  }
+
+  .hero h1,
+  .page-header-card h1 {
+    max-width: none;
+    line-height: 1.14;
+  }
+
+  .hero-lead,
+  .page-header-card p,
+  .section-note {
+    font-size: 0.96rem;
+  }
+
+  .eyebrow,
+  .study-label,
+  .brand-mark,
+  .section-kicker,
+  .code-label {
+    letter-spacing: 0.08em;
+  }
+
+  .key-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .key-stat,
+  .hero-panel,
+  .focus-card,
+  .command-card,
+  .accent-band,
+  .revision-banner,
+  .scenario-block,
+  .quote-box,
+  .footer-card {
+    padding: 16px;
+  }
+
+  .section {
+    padding: 18px 0;
+  }
+
+  .section-header {
+    margin-bottom: 16px;
+    gap: 12px;
+  }
+
+  .button-row {
+    gap: 10px;
+  }
+
+  .button-link,
+  .button-link.secondary,
+  .button-link.ghost {
+    width: 100%;
+    min-height: 46px;
+  }
+
+  .code-block,
+  .syntax-block,
+  table {
+    font-size: 0.82rem;
+  }
+
+  .code-block code,
+  .syntax-block {
+    padding: 14px 16px;
+  }
+
+  th,
+  td {
+    padding: 10px;
+  }
+
+  .table-wrap {
+    margin: 0 -4px;
+    padding-bottom: 2px;
   }
 }
