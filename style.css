@@ -672,23 +672,43 @@ th {
 }
 
 .code-block {
-  background: rgba(18, 24, 38, 0.92);
-  color: #c9e8e2;
+  background: #0d1520;
+  color: #8baab8;
   border-radius: var(--radius-md);
-  padding: 20px 22px;
+  padding: 0;
   overflow-x: auto;
   font-family: Consolas, "Courier New", monospace;
-  font-size: 0.86rem;
-  line-height: 1.75;
+  font-size: 0.87rem;
+  line-height: 1.8;
   margin: 14px 0 0;
-  border: 1px solid rgba(14, 90, 100, 0.28);
+  border: 1px solid rgba(14, 90, 100, 0.32);
+  border-top: 3px solid var(--secondary);
+  box-shadow: 0 8px 24px rgba(10, 18, 30, 0.28);
 }
 
 .code-block code {
-  color: inherit;
+  display: block;
+  padding: 18px 22px;
+  color: #9dbdcc;
   font-family: inherit;
   background: none;
-  padding: 0;
+}
+
+/* -- SQL/RMAN keywords: bright teal matching site accent */
+.cm-k {
+  color: #4fd6d2;
+  font-weight: 600;
+}
+
+/* -- Comments: muted gray, italic — clearly secondary */
+.cm-c {
+  color: #4e5f6b;
+  font-style: italic;
+}
+
+/* -- String literals: warm amber — visually distinct from commands */
+.cm-s {
+  color: #f0a84a;
 }
 
 .code-label {
