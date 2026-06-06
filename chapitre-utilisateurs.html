@@ -15,9 +15,10 @@
       </div>
       <nav class="nav-links">
         <a href="index.html">Accueil</a>
-        <a href="tp-utilisateurs.html">Resume TP</a>
-        <a href="exercices-types.html#utilisateurs">Exercices types</a>
-        <a href="examens-similaires.html#utilisateurs">Examens similaires</a>
+        <a href="tp-utilisateurs.html">TP</a>
+        <a href="exercices-types.html#utilisateurs">Exercices</a>
+        <a href="examens-similaires.html#utilisateurs">Examens</a>
+        <a href="chapitre-backup-recovery.html">Suivant →</a>
       </nav>
     </div>
   </header>
@@ -26,50 +27,44 @@
     <section class="page-header">
       <div class="page-shell">
         <div class="page-header-card">
-          <span class="eyebrow">Cours seulement</span>
-          <h1>Gestion des utilisateurs, des privileges, des roles et des profils</h1>
-          <p>
-            Ce chapitre traite toute la securite logique de base dans Oracle: qui entre dans la base,
-            avec quels droits, dans quel espace de travail, et avec quelles contraintes de mot de passe
-            et de ressources.
-          </p>
+          <span class="eyebrow">Resume complet du cours</span>
+          <h1>Utilisateurs, privileges, roles et profils</h1>
+          <p>Toute la securite logique Oracle avec la syntaxe exacte de chaque commande. Ce chapitre couvre l'integralite des points du cours.</p>
           <div class="page-anchor-nav">
-            <a href="#idee-cle">Idee cle</a>
+            <a href="#notions">Notions cles</a>
             <a href="#utilisateurs">Utilisateurs</a>
             <a href="#privileges">Privileges</a>
             <a href="#roles">Roles</a>
             <a href="#profils">Profils</a>
-            <a href="#commandes">Commandes</a>
+            <a href="#vues">Vues</a>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="section" id="idee-cle">
+    <section class="section" id="notions">
       <div class="page-shell columns">
         <article class="panel topic-block">
-          <div class="study-label">Point fort</div>
-          <h2>Idee cle du chapitre</h2>
-          <p>
-            Oracle etant un SGBD multiutilisateur, la securite ne se limite pas a bloquer l’acces.
-            Il faut aussi organiser les droits de facon fine. Un utilisateur doit pouvoir se connecter,
-            creer ou lire uniquement ce qui lui est permis, consommer un espace controle et respecter
-            une politique de mot de passe.
-          </p>
-          <div class="quote-box">
-            Un bon administrateur ne donne pas tous les droits a tout le monde. Il affecte le minimum
-            necessaire, puis structure les autorisations pour qu’elles restent simples a maintenir.
-          </div>
+          <h2>Notions cles</h2>
+          <ul class="bullet-list">
+            <li><strong>Utilisateur</strong> — identite Oracle. Possede un schema (espace d'objets) et des droits. Doit avoir au minimum <span class="mono">CREATE SESSION</span> pour se connecter.</li>
+            <li><strong>Quota</strong> — limite l'espace qu'un utilisateur peut consommer dans un tablespace.</li>
+            <li><strong>Privilege systeme</strong> — autorise une action globale sur la base (ex: creer une table).</li>
+            <li><strong>Privilege objet</strong> — autorise une action sur un objet precis d'un schema (ex: SELECT sur une table).</li>
+            <li><strong>Role</strong> — regroupement nomme de privileges pour simplifier l'administration.</li>
+            <li><strong>Profil</strong> — ensemble de limites sur les mots de passe et les ressources systeme.</li>
+          </ul>
         </article>
-
         <aside class="panel">
-          <h2>Ce qu’il faut absolument retenir</h2>
+          <h2>Differences a ne pas confondre</h2>
           <ul class="check-list">
-            <li>Utilisateur = identite Oracle.</li>
             <li>Privilege systeme = action generale sur la base.</li>
             <li>Privilege objet = action sur un objet precis.</li>
-            <li>Role = groupe de privileges.</li>
-            <li>Profil = limites de mot de passe et de ressources.</li>
+            <li>Role = conteneur de privileges (facilite l'administration).</li>
+            <li>Profil = limite les mots de passe ET les ressources.</li>
+            <li>WITH GRANT OPTION = transmet un privilege objet.</li>
+            <li>WITH ADMIN OPTION = transmet un privilege systeme ou role.</li>
+            <li>SYSBACKUP = role pour RMAN (pas un privilege).</li>
           </ul>
         </aside>
       </div>
@@ -78,38 +73,83 @@
     <section class="section" id="utilisateurs">
       <div class="page-shell">
         <article class="panel topic-block">
-          <div class="revision-banner">
-            <strong>Point fort revision:</strong>
-            dans ce chapitre, l'examen aime les syntaxes exactes de creation, d'attribution des droits et de creation de profil.
-          </div>
           <h2>1. Gestion des utilisateurs</h2>
-          <h3>Ce qu’on decide lors de la creation</h3>
+          <h3>Elements definis a la creation</h3>
           <ul class="bullet-list">
-            <li>Le nom de l’utilisateur.</li>
-            <li>La methode d’authentification.</li>
-            <li>Le tablespace par defaut et le tablespace temporaire.</li>
-            <li>Les quotas sur les tablespaces.</li>
-            <li>Les roles et privileges de depart.</li>
+            <li>Nom + methode d'authentification (base de donnees ou OS).</li>
+            <li>Tablespace par defaut (stockage des objets permanents).</li>
+            <li>Tablespace temporaire (tri, jointures, operations temporaires).</li>
+            <li>Quotas sur les tablespaces (espace autorise).</li>
+            <li>Privileges et roles initiaux.</li>
           </ul>
 
           <h3>Authentification</h3>
           <ul class="bullet-list">
-            <li>Par la base de donnees: mode le plus courant, Oracle verifie l’identifiant et le mot de passe.</li>
-            <li>Par le systeme d’exploitation: Oracle s’appuie sur l’authentification du systeme.</li>
+            <li><strong>Par la base</strong> — Oracle verifie l'identifiant et le mot de passe. Mode le plus courant.</li>
+            <li><strong>Par l'OS</strong> — Oracle fait confiance a l'authentification du systeme d'exploitation. Mot-cle <span class="mono">EXTERNALLY</span>.</li>
           </ul>
 
-          <h3>Operations essentielles sur l’utilisateur</h3>
-          <ul class="bullet-list">
-            <li>Creation avec <span class="mono">CREATE USER</span>.</li>
-            <li>Modification avec <span class="mono">ALTER USER</span>.</li>
-            <li>Suppression avec <span class="mono">DROP USER</span>, eventuellement avec suppression du schema.</li>
-            <li>Consultation des informations avec des vues comme <span class="mono">DBA_USERS</span>.</li>
-          </ul>
+          <span class="code-label">CREATE USER — syntaxe complete</span>
+          <pre class="code-block"><code>CREATE USER app_user IDENTIFIED BY mon_password
+  DEFAULT TABLESPACE users
+  TEMPORARY TABLESPACE temp
+  QUOTA 50M ON users
+  ACCOUNT UNLOCK;
 
-          <div class="callout">
-            Le cours insiste sur le fait qu’un utilisateur ne se resume pas a un login. Il a aussi un ancrage
-            dans l’espace de stockage via les tablespaces et les quotas.
+-- Authentification par l'OS
+CREATE USER user_name IDENTIFIED EXTERNALLY;
+
+-- Creation minimale (tablespaces et quota par defaut)
+CREATE USER user_name IDENTIFIED BY password;</code></pre>
+
+          <span class="code-label">ALTER USER — toutes les variantes</span>
+          <pre class="code-block"><code>-- Changer le mot de passe
+ALTER USER app_user IDENTIFIED BY nouveau_password;
+
+-- Verrouiller le compte (connexion impossible)
+ALTER USER app_user ACCOUNT LOCK;
+
+-- Deverrouiller le compte
+ALTER USER app_user ACCOUNT UNLOCK;
+
+-- Forcer le changement de mot de passe a la prochaine connexion
+ALTER USER app_user PASSWORD EXPIRE;
+
+-- Modifier le tablespace par defaut
+ALTER USER app_user DEFAULT TABLESPACE data_tbs;
+
+-- Modifier le tablespace temporaire
+ALTER USER app_user TEMPORARY TABLESPACE temp2;
+
+-- Modifier les quotas
+ALTER USER app_user QUOTA 100M ON users;
+ALTER USER app_user QUOTA UNLIMITED ON users;
+
+-- Supprimer le quota (ramene a 0)
+ALTER USER app_user QUOTA 0 ON users;
+
+-- Affecter un profil
+ALTER USER app_user PROFILE profil_app;</code></pre>
+
+          <span class="code-label">DROP USER</span>
+          <pre class="code-block"><code>-- Echoue si l'utilisateur possede des objets
+DROP USER app_user;
+
+-- Supprime l'utilisateur ET tous ses objets (tables, vues, sequences...)
+DROP USER app_user CASCADE;</code></pre>
+
+          <div class="callout danger">
+            <strong>Exam:</strong> <span class="mono">DROP USER CASCADE</span> supprime aussi tout le schema. Sans CASCADE, Oracle refuse si le schema n'est pas vide.
           </div>
+
+          <span class="code-label">Verification via dictionnaire</span>
+          <pre class="code-block"><code>SELECT username, account_status, default_tablespace, profile, expiry_date
+  FROM dba_users
+  ORDER BY username;
+
+SELECT username, tablespace_name, bytes, max_bytes
+  FROM dba_ts_quotas
+  WHERE username = 'APP_USER';</code></pre>
         </article>
       </div>
     </section>
@@ -118,42 +158,79 @@
       <div class="page-shell">
         <article class="panel topic-block">
           <h2>2. Gestion des privileges</h2>
-          <p>
-            Les privileges servent a securiser l’acces aux ressources Oracle. Le chapitre distingue
-            clairement deux familles.
-          </p>
-
           <div class="table-wrap">
             <table>
-              <thead>
-                <tr>
-                  <th>Type</th>
-                  <th>Definition</th>
-                  <th>Exemples</th>
-                </tr>
-              </thead>
+              <thead><tr><th>Type</th><th>Definition</th><th>Exemples</th></tr></thead>
               <tbody>
                 <tr>
                   <td>Privilege systeme</td>
-                  <td>Autorise une action generale sur la base ou sur des categories d’objets.</td>
-                  <td><span class="mono">CREATE SESSION</span>, <span class="mono">CREATE TABLE</span>, <span class="mono">CREATE TABLESPACE</span></td>
+                  <td>Action generale sur la base ou sur des categories d'objets.</td>
+                  <td><span class="mono">CREATE SESSION</span>, <span class="mono">CREATE TABLE</span>, <span class="mono">CREATE VIEW</span>, <span class="mono">ALTER SYSTEM</span>, <span class="mono">GRANT UNLIMITED TABLESPACE</span></td>
                 </tr>
                 <tr>
                   <td>Privilege objet</td>
-                  <td>Autorise une action sur un objet donne appartenant a un schema.</td>
-                  <td><span class="mono">SELECT</span>, <span class="mono">INSERT</span>, <span class="mono">UPDATE</span>, <span class="mono">DELETE</span> sur une table</td>
+                  <td>Action sur un objet precis d'un schema.</td>
+                  <td><span class="mono">SELECT</span>, <span class="mono">INSERT</span>, <span class="mono">UPDATE</span>, <span class="mono">DELETE</span>, <span class="mono">EXECUTE</span> sur une table/vue/procedure</td>
                 </tr>
               </tbody>
             </table>
           </div>
 
-          <h3>Gestion pratique</h3>
-          <ul class="bullet-list">
-            <li>Accorder avec <span class="mono">GRANT</span>.</li>
-            <li>Retirer avec <span class="mono">REVOKE</span>.</li>
-            <li>Le privilege peut etre direct ou transmis via un role.</li>
-            <li>Pour les privileges objet, on peut parfois accorder avec <span class="mono">WITH GRANT OPTION</span> selon le contexte.</li>
-          </ul>
+          <span class="code-label">GRANT — privileges systeme</span>
+          <pre class="code-block"><code>GRANT CREATE SESSION TO app_user;
+GRANT CREATE TABLE TO app_user;
+GRANT CREATE VIEW TO app_user;
+GRANT CREATE SEQUENCE TO app_user;
+GRANT CREATE PROCEDURE TO app_user;
+GRANT UNLIMITED TABLESPACE TO app_user;
+
+-- Avec droit de transmettre (WITH ADMIN OPTION)
+GRANT CREATE TABLE TO app_user WITH ADMIN OPTION;</code></pre>
+
+          <span class="code-label">GRANT — privileges objet</span>
+          <pre class="code-block"><code>-- Donner plusieurs privileges sur une table
+GRANT SELECT, INSERT, UPDATE, DELETE
+  ON scott.emp
+  TO app_user;
+
+-- Privilege sur certaines colonnes seulement
+GRANT UPDATE (sal, comm)
+  ON scott.emp
+  TO app_user;
+
+-- Avec droit de transmettre le privilege (WITH GRANT OPTION)
+GRANT SELECT ON scott.emp TO app_user WITH GRANT OPTION;
+
+-- Donner a tous les utilisateurs
+GRANT SELECT ON scott.emp TO PUBLIC;</code></pre>
+
+          <span class="code-label">REVOKE — retirer des privileges</span>
+          <pre class="code-block"><code>-- Retirer un privilege systeme
+REVOKE CREATE TABLE FROM app_user;
+
+-- Retirer un privilege objet
+REVOKE SELECT ON scott.emp FROM app_user;
+
+-- Retirer plusieurs privileges objet
+REVOKE INSERT, UPDATE, DELETE ON scott.emp FROM app_user;</code></pre>
+
+          <span class="code-label">Verification des privileges</span>
+          <pre class="code-block"><code>-- Privileges systeme accordes
+SELECT grantee, privilege, admin_option
+  FROM dba_sys_privs
+  WHERE grantee = 'APP_USER';
+
+-- Privileges objet accordes
+SELECT grantee, owner, table_name, privilege, grantable
+  FROM dba_tab_privs
+  WHERE grantee = 'APP_USER';
+
+-- Privileges actifs dans la session courante
+SELECT * FROM session_privs;</code></pre>
+
+          <div class="callout">
+            <strong>WITH GRANT OPTION vs WITH ADMIN OPTION:</strong> <span class="mono">WITH GRANT OPTION</span> s'applique aux privileges objet (transmet le droit sur l'objet). <span class="mono">WITH ADMIN OPTION</span> s'applique aux privileges systeme et aux roles (transmet le droit de gestion).
+          </div>
         </article>
       </div>
     </section>
@@ -162,29 +239,56 @@
       <div class="page-shell columns">
         <article class="panel topic-block">
           <h2>3. Gestion des roles</h2>
-          <p>
-            Un role est un regroupement nomme de privileges. L’interet est administratif:
-            au lieu de distribuer les memes privileges un par un a plusieurs utilisateurs,
-            on les met dans un role puis on attribue ce role.
-          </p>
-          <ul class="bullet-list">
-            <li>Creation d’un role et ajout de privileges.</li>
-            <li>Attribution du role aux utilisateurs.</li>
-            <li>Consultation des roles et des privileges associes via le dictionnaire.</li>
-            <li>Suppression du role si necessaire.</li>
-          </ul>
+          <p>Un role regroupe des privileges sous un nom. On attribue le role plutot que chaque privilege individuellement. Un seul REVOKE retire tous les privileges du role.</p>
+
+          <span class="code-label">Cycle complet d'un role</span>
+          <pre class="code-block"><code>-- Creer un role
+CREATE ROLE role_compta;
+
+-- Donner des privileges au role
+GRANT CREATE SESSION TO role_compta;
+GRANT SELECT, INSERT, UPDATE, DELETE
+  ON finance.factures
+  TO role_compta;
+
+-- Donner le role a un utilisateur
+GRANT role_compta TO app_user;
+
+-- Donner le role avec possibilite de le transmettre
+GRANT role_compta TO app_user WITH ADMIN OPTION;
+
+-- Retirer le role d'un utilisateur
+REVOKE role_compta FROM app_user;
+
+-- Supprimer le role
+DROP ROLE role_compta;</code></pre>
+
+          <span class="code-label">Verification des roles</span>
+          <pre class="code-block"><code>-- Roles accordes aux utilisateurs
+SELECT grantee, granted_role, default_role, admin_option
+  FROM dba_role_privs
+  WHERE grantee = 'APP_USER';
+
+-- Roles actifs dans la session courante
+SELECT * FROM session_roles;</code></pre>
         </article>
 
         <aside class="panel">
-          <h2>Roles standards cites par le cours</h2>
-          <ul class="check-list">
-            <li><span class="mono">CONNECT</span></li>
-            <li><span class="mono">RESOURCE</span></li>
-            <li><span class="mono">DBA</span></li>
-          </ul>
-          <p class="muted">
-            Le cours les presente comme roles systeme standards a connaitre.
-          </p>
+          <h2>Roles standards a connaitre</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Role</th><th>Contenu</th></tr></thead>
+              <tbody>
+                <tr><td><span class="mono">CONNECT</span></td><td>Principalement CREATE SESSION. Historiquement contenait plus de privileges.</td></tr>
+                <tr><td><span class="mono">RESOURCE</span></td><td>Permet la creation d'objets: tables, sequences, procedures, etc.</td></tr>
+                <tr><td><span class="mono">DBA</span></td><td>Role puissant, reserve aux administrateurs. Contient la majorite des privileges systeme.</td></tr>
+                <tr><td><span class="mono">SYSBACKUP</span></td><td>Role recommande pour RMAN: couvre backup et recovery sans donner acces aux donnees applicatives.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout" style="margin-top:14px">
+            <strong>Exam:</strong> SYSBACKUP est un ROLE (pas un privilege). Il est prefere au role DBA pour RMAN car il respecte le principe du moindre privilege.
+          </div>
         </aside>
       </div>
     </section>
@@ -192,156 +296,106 @@
     <section class="section" id="profils">
       <div class="page-shell">
         <article class="panel topic-block">
-          <h2>4. Gestion des profils et des mots de passe</h2>
-          <p>
-            Le profil est l’outil Oracle pour centraliser des limites relatives aux mots de passe
-            et a certaines ressources systeme. Le cours le rattache directement a l’augmentation
-            de la securite de la base.
-          </p>
+          <h2>4. Gestion des profils</h2>
+          <p>Un profil centralise les limites de mots de passe et de ressources. Chaque utilisateur a un profil (DEFAULT par defaut). Les limites de ressources ne s'appliquent que si le parametre <span class="mono">RESOURCE_LIMIT = TRUE</span>.</p>
 
-          <h3>Limites de mot de passe</h3>
-          <ul class="bullet-list">
-            <li><span class="mono">FAILED_LOGIN_ATTEMPTS</span>: nombre maximal d’essais de connexion echoues.</li>
-            <li><span class="mono">PASSWORD_LOCK_TIME</span>: duree de verrouillage apres echecs.</li>
-            <li><span class="mono">PASSWORD_LIFE_TIME</span>: duree de validite du mot de passe.</li>
-          </ul>
+          <h3>Parametres de mot de passe</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Parametre</th><th>Role</th></tr></thead>
+              <tbody>
+                <tr><td><span class="mono">FAILED_LOGIN_ATTEMPTS</span></td><td>Nombre max de tentatives echouees avant verrouillage du compte.</td></tr>
+                <tr><td><span class="mono">PASSWORD_LOCK_TIME</span></td><td>Duree de verrouillage apres les echecs (en jours, fractions acceptees).</td></tr>
+                <tr><td><span class="mono">PASSWORD_LIFE_TIME</span></td><td>Duree de validite du mot de passe (en jours).</td></tr>
+                <tr><td><span class="mono">PASSWORD_GRACE_TIME</span></td><td>Periode de grace apres expiration: l'utilisateur peut encore se connecter mais doit changer son mot de passe.</td></tr>
+                <tr><td><span class="mono">PASSWORD_REUSE_TIME</span></td><td>Delai minimal avant de pouvoir reutiliser un ancien mot de passe (en jours).</td></tr>
+                <tr><td><span class="mono">PASSWORD_REUSE_MAX</span></td><td>Nombre de changements requis avant de reutiliser un mot de passe.</td></tr>
+              </tbody>
+            </table>
+          </div>
 
-          <h3>Limites de ressources</h3>
-          <ul class="bullet-list">
-            <li><span class="mono">SESSIONS_PER_USER</span>: nombre de sessions simultanees.</li>
-            <li><span class="mono">CONNECT_TIME</span> ou limites proches: temps de connexion autorise.</li>
-            <li><span class="mono">LOGICAL_READS_PER_SESSION</span>: volume de lectures logiques.</li>
-          </ul>
+          <h3>Parametres de ressources</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Parametre</th><th>Role</th></tr></thead>
+              <tbody>
+                <tr><td><span class="mono">SESSIONS_PER_USER</span></td><td>Nombre max de sessions simultanees autorisees pour cet utilisateur.</td></tr>
+                <tr><td><span class="mono">CONNECT_TIME</span></td><td>Duree maximale d'une session connectee (en minutes).</td></tr>
+                <tr><td><span class="mono">IDLE_TIME</span></td><td>Duree maximale d'inactivite avant deconnexion automatique (en minutes).</td></tr>
+                <tr><td><span class="mono">LOGICAL_READS_PER_SESSION</span></td><td>Nombre max de lectures logiques par session (blocs lus).</td></tr>
+                <tr><td><span class="mono">PRIVATE_SGA</span></td><td>Espace SGA prive alloue a chaque session (mode serveurs partages).</td></tr>
+              </tbody>
+            </table>
+          </div>
 
-          <h3>Demarche logique</h3>
-          <ol class="bullet-list">
-            <li>Creer le profil avec ses limites.</li>
-            <li>L’affecter aux utilisateurs.</li>
-            <li>Verifier les parametres via les vues du dictionnaire.</li>
-          </ol>
+          <span class="code-label">CREATE PROFILE — syntaxe complete</span>
+          <pre class="code-block"><code>CREATE PROFILE profil_app LIMIT
+  FAILED_LOGIN_ATTEMPTS  3
+  PASSWORD_LOCK_TIME     1
+  PASSWORD_LIFE_TIME     90
+  PASSWORD_GRACE_TIME    7
+  SESSIONS_PER_USER      2
+  CONNECT_TIME           60
+  IDLE_TIME              15
+  LOGICAL_READS_PER_SESSION 1000000;
+
+-- Affecter le profil a un utilisateur
+ALTER USER app_user PROFILE profil_app;
+
+-- Remettre le profil par defaut
+ALTER USER app_user PROFILE DEFAULT;</code></pre>
+
+          <span class="code-label">Verification des profils</span>
+          <pre class="code-block"><code>-- Voir les limites d'un profil
+SELECT profile, resource_name, limit
+  FROM dba_profiles
+  WHERE profile = 'PROFIL_APP'
+  ORDER BY resource_name;
+
+-- Voir quel profil est affecte a un utilisateur
+SELECT username, profile
+  FROM dba_users
+  WHERE username = 'APP_USER';</code></pre>
+
+          <div class="callout danger">
+            <strong>Exam:</strong> Distinguer PASSWORD_LOCK_TIME (duree de verrouillage apres echecs) de PASSWORD_LIFE_TIME (duree de validite normale du mot de passe). Ce sont deux parametres independants souvent confondus.
+          </div>
         </article>
       </div>
     </section>
 
-    <section class="section" id="commandes">
+    <section class="section" id="vues">
       <div class="page-shell">
         <article class="panel topic-block">
-          <div class="study-label">Revision syntaxe</div>
-          <h2>5. Commandes du cours a memoriser</h2>
-          <div class="command-grid">
-            <div class="command-card">
-              <h3>Creation et authentification</h3>
-              <p>Le cours donne la syntaxe de base pour creer un utilisateur Oracle.</p>
-              <pre class="syntax-block">CREATE USER user
-IDENTIFIED { BY password | EXTERNALLY }
-[DEFAULT TABLESPACE tablespace]
-[TEMPORARY TABLESPACE tablespace]
-[QUOTA { integer [K|M] | UNLIMITED } ON tablespace]
-[PASSWORD EXPIRE]
-[ACCOUNT { LOCK | UNLOCK }];</pre>
-            </div>
-            <div class="command-card">
-              <h3>Modification et suppression</h3>
-              <p>Ces variantes apparaissent explicitement dans le support.</p>
-              <pre class="syntax-block">ALTER USER scott IDENTIFIED BY nouveau_motdepasse;
-ALTER USER user QUOTA 15M ON tablespace1 QUOTA 5M ON tablespace2;
-ALTER USER scott DEFAULT TABLESPACE tablespace2 TEMPORARY TABLESPACE tmp_tablespace2;
-ALTER USER user ACCOUNT LOCK;
-DROP USER test;
-DROP USER test CASCADE;</pre>
-            </div>
-            <div class="command-card">
-              <h3>Vues de controle utilisateur</h3>
-              <p>Le cours cite directement les vues de dictionnaire a interroger.</p>
-              <pre class="syntax-block">SELECT * FROM DBA_USERS
-WHERE username = 'NOM_UTILISATEUR';
-
-SELECT TABLESPACE_NAME, USERNAME, BYTES, MAX_BYTES
-FROM DBA_TS_QUOTAS
-WHERE USERNAME = 'NOM_UTILISATEUR'
-  AND TABLESPACE_NAME = 'NOM_TABLESPACE';</pre>
-            </div>
-            <div class="command-card">
-              <h3>Privileges systeme et objet</h3>
-              <p>Ce sont les syntaxes d'attribution et de revocation du cours.</p>
-              <pre class="syntax-block">GRANT CREATE SESSION TO nom_utilisateur;
-GRANT CREATE TABLE TO nom_utilisateur;
-GRANT CREATE VIEW TO nom_utilisateur;
-
-GRANT SELECT, INSERT, UPDATE, DELETE
-ON SYS.client TO nom_utilisateur;
-
-GRANT UPDATE (nom, prenom)
-ON SYS.client TO nom_utilisateur;
-
-REVOKE CREATE SESSION FROM nom_utilisateur;
-REVOKE SELECT ON SYS.client FROM nom_utilisateur;
-REVOKE INSERT, UPDATE, DELETE
-ON SYS.client FROM nom_utilisateur;</pre>
-            </div>
-            <div class="command-card">
-              <h3>Roles</h3>
-              <p>Le support montre la creation d'un role, son remplissage et les vues utiles.</p>
-              <pre class="syntax-block">CREATE ROLE compta;
-GRANT SELECT, INSERT, UPDATE, DELETE ON client TO compta;
-GRANT SELECT, INSERT, UPDATE ON fournisseur TO compta;
-GRANT compta TO nom_utilisateur;
-
-SELECT * FROM DBA_SYS_PRIVS WHERE grantee = 'CONNECT';
-SELECT * FROM DBA_ROLE_PRIVS WHERE grantee = 'USER';
-SELECT * FROM DBA_TAB_PRIVS WHERE grantee = 'USER';
-SELECT * FROM SESSION_ROLES;
-SELECT * FROM SESSION_PRIVS;
-DROP ROLE nom_role;</pre>
-            </div>
-            <div class="command-card">
-              <h3>Profils et mots de passe</h3>
-              <p>Le cours ne se limite pas aux concepts, il donne aussi la syntaxe de profil.</p>
-              <pre class="syntax-block">ALTER USER user PROFILE profile_user;
-
-CREATE PROFILE app_user LIMIT
-  FAILED_LOGIN_ATTEMPTS 3
-  PASSWORD_LOCK_TIME 10
-  SESSIONS_PER_USER UNLIMITED
-  CONNECT_TIME 45
-  LOGICAL_READS_PER_SESSION DEFAULT
-  PRIVATE_SGA 15M;
-
-SELECT profile, resource_name, limit
-FROM DBA_PROFILES;
-
-SELECT username, profile
-FROM DBA_USERS
-WHERE username = 'NOM_UTILISATEUR';</pre>
-            </div>
+          <h2>5. Vues du dictionnaire — reference complete</h2>
+          <div class="table-wrap">
+            <table class="views-table">
+              <thead><tr><th>Vue</th><th>Contenu</th></tr></thead>
+              <tbody>
+                <tr><td><span class="mono">DBA_USERS</span></td><td>Tous les utilisateurs: statut, tablespace par defaut, profil, date d'expiration.</td></tr>
+                <tr><td><span class="mono">DBA_TS_QUOTAS</span></td><td>Quotas de chaque utilisateur sur chaque tablespace.</td></tr>
+                <tr><td><span class="mono">DBA_SYS_PRIVS</span></td><td>Privileges systeme accordes aux utilisateurs et aux roles.</td></tr>
+                <tr><td><span class="mono">DBA_TAB_PRIVS</span></td><td>Privileges objet accordes sur les tables et autres objets.</td></tr>
+                <tr><td><span class="mono">DBA_ROLE_PRIVS</span></td><td>Roles accordes aux utilisateurs et aux autres roles.</td></tr>
+                <tr><td><span class="mono">SESSION_ROLES</span></td><td>Roles actifs dans la session courante.</td></tr>
+                <tr><td><span class="mono">SESSION_PRIVS</span></td><td>Privileges actifs dans la session courante.</td></tr>
+                <tr><td><span class="mono">DBA_PROFILES</span></td><td>Toutes les limites definies pour chaque profil.</td></tr>
+              </tbody>
+            </table>
           </div>
-
-          <div class="revision-banner">
-            <strong>Point fort revision:</strong>
-            memorise aussi le script <span class="mono">utlpwdmg.sql</span> cite par le cours pour activer la gestion des mots de passe.
+          <div class="button-row">
+            <a class="button-link secondary" href="tp-utilisateurs.html">Resume TP</a>
+            <a class="button-link" href="exercices-types.html#utilisateurs">Exercices types</a>
+            <a class="button-link ghost" href="examens-similaires.html#utilisateurs">Examens similaires</a>
           </div>
         </article>
-
-        <div class="panel">
-          <h2>Resume flash</h2>
-          <p>
-            Dans ce chapitre, Oracle se comporte comme un environnement controle: les utilisateurs sont
-            identifies, les actions sont autorisees ou refusees par privileges, les droits peuvent etre
-            factorises par roles, et les politiques de securite sont durcies par profils.
-          </p>
-          <div class="button-row">
-            <a class="button-link secondary" href="tp-utilisateurs.html">Voir le resume TP de cette partie</a>
-            <a class="button-link" href="exercices-types.html#utilisateurs">Voir les exercices types</a>
-            <a class="button-link ghost" href="examens-similaires.html#utilisateurs">Voir les examens similaires</a>
-          </div>
-        </div>
       </div>
     </section>
   </main>
 
   <footer class="footer">
     <div class="page-shell">
-      <div class="footer-card">Chapitre redige sans integrer les TPs. Le contenu ici vient du cours theorique.</div>
+      <div class="footer-card">Chapitre 1 — Resume complet avec toutes les commandes du cours.</div>
     </div>
   </footer>
 </body>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RMAN Intro - Resume chapitre</title>
+  <title>RMAN Intro - Resume complet</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -15,9 +15,11 @@
       </div>
       <nav class="nav-links">
         <a href="index.html">Accueil</a>
-        <a href="tp-rman-intro.html">Resume TP</a>
-        <a href="exercices-types.html#rman-intro">Exercices types</a>
-        <a href="examens-similaires.html#rman-intro">Examens similaires</a>
+        <a href="tp-rman-intro.html">TP</a>
+        <a href="exercices-types.html#rman-intro">Exercices</a>
+        <a href="examens-similaires.html#rman-intro">Examens</a>
+        <a href="chapitre-backup-recovery.html">← Chap 2</a>
+        <a href="chapitre-recovery-catalog.html">Chap 4 →</a>
       </nav>
     </div>
   </header>
@@ -26,19 +28,15 @@
     <section class="page-header">
       <div class="page-shell">
         <div class="page-header-card">
-          <span class="eyebrow">Cours seulement</span>
-          <h1>RMAN, c’est quoi et comment on le pilote</h1>
-          <p>
-            RMAN est le gestionnaire de sauvegarde et de recuperation integre a Oracle. Cette partie du cours
-            explique son interet, sa connexion, ses commandes, sa configuration et sa politique de retention.
-          </p>
+          <span class="eyebrow">Resume complet du cours</span>
+          <h1>RMAN — connexion, commandes, configuration, retention</h1>
+          <p>Tout ce que RMAN fait, comment s'y connecter, comment le configurer, et toutes les commandes cles avec leur syntaxe exacte.</p>
           <div class="page-anchor-nav">
             <a href="#definition">Definition</a>
             <a href="#connexion">Connexion</a>
             <a href="#commandes">Commandes</a>
             <a href="#config">Configuration</a>
             <a href="#retention">Retention</a>
-            <a href="#syntaxe">Syntaxe</a>
           </div>
         </div>
       </div>
@@ -47,25 +45,26 @@
     <section class="section" id="definition">
       <div class="page-shell columns">
         <article class="panel topic-block">
-          <h2>1. Definition et interet</h2>
-          <p>
-            RMAN signifie <span class="mono">Recovery Manager</span>. C’est l’outil Oracle integre pour gerer
-            les sauvegardes et recuperations de la base avec une connaissance interne de sa structure.
-          </p>
+          <h2>1. Definition et avantages</h2>
+          <p><strong>RMAN</strong> (Recovery Manager) est l'outil Oracle integre pour gerer les sauvegardes et recuperations. Il connait la structure interne de la base.</p>
           <ul class="bullet-list">
-            <li>Il comprend les tablespaces, datafiles, control files et archived redo logs.</li>
-            <li>Il valide les blocs et sait optimiser certains traitements.</li>
-            <li>Il gere la FRA, les sauvegardes multistream et plusieurs supports de stockage.</li>
+            <li>Connait les tablespaces, datafiles, control files, archived redo logs, SPFILE.</li>
+            <li>Valide les blocs au moment de la sauvegarde (detecte la corruption).</li>
+            <li>Gere la FRA, les sauvegardes multistream, plusieurs supports de stockage.</li>
+            <li>Supporte les sauvegardes incrementales (seuls les blocs modifies).</li>
+            <li>Trace l'historique complet des operations dans le control file ou le Recovery Catalog.</li>
+            <li>Peut compresser et chiffrer les sauvegardes.</li>
           </ul>
         </article>
-
         <aside class="panel">
-          <h2>Pourquoi RMAN est superieur a une copie manuelle</h2>
+          <h2>RMAN vs copie manuelle</h2>
           <ul class="check-list">
-            <li>Il connait la structure Oracle.</li>
-            <li>Il sait faire des backups incrementaux.</li>
-            <li>Il sait recuperer proprement.</li>
-            <li>Il trace l’historique des operations.</li>
+            <li>Connait la structure Oracle (pas une copie aveugle).</li>
+            <li>Sauvegarde incrementale: seuls les blocs modifies.</li>
+            <li>Verification de l'integrite des blocs.</li>
+            <li>Historique des operations.</li>
+            <li>Integration avec la FRA.</li>
+            <li>Gestion automatique de la retention.</li>
           </ul>
         </aside>
       </div>
@@ -74,66 +73,126 @@
     <section class="section" id="connexion">
       <div class="page-shell">
         <article class="panel topic-block">
-          <div class="revision-banner">
-            <strong>Point fort revision:</strong>
-            ici il faut connaitre non seulement les notions RMAN, mais aussi la facon exacte de se connecter et de lire la configuration.
-          </div>
           <h2>2. Connexion a RMAN</h2>
-          <ul class="bullet-list">
-            <li>Le mot-cle <span class="mono">TARGET</span> designe la base cible de la sauvegarde ou de la recuperation.</li>
-            <li>Le cours met en avant l’utilisation du privilege <span class="mono">SYSBACKUP</span>.</li>
-            <li>Le but est de separer les responsabilites: un DBA backup n’a pas besoin d’avoir les privileges d’acces aux donnees applicatives.</li>
-          </ul>
+          <p>Le mot-cle <span class="mono">TARGET</span> designe la base cible. <strong>SYSBACKUP est un ROLE</strong> (pas un privilege) recommande pour les operations RMAN: il couvre backup et recovery sans donner acces aux donnees applicatives.</p>
+
+          <span class="code-label">Toutes les formes de connexion</span>
+          <pre class="code-block"><code>-- Connexion locale en OS authentication (le plus courant en TP)
+rman TARGET /
+
+-- Connexion locale avec le role SYSBACKUP (recommande)
+rman TARGET "/ AS SYSBACKUP"
+
+-- Connexion distante avec mot de passe
+rman TARGET sys/password@mydb
+
+-- Connexion depuis l'invite RMAN (apres lancement sans argument)
+rman
+CONNECT TARGET /
+CONNECT TARGET sys/password@mydb;
+
+-- Connexion avec Recovery Catalog en plus
+rman TARGET / CATALOG rcat_owner/password@catdb</code></pre>
+
           <div class="callout">
-            Pour l’examen, il faut savoir expliquer que <span class="mono">SYSBACKUP</span> couvre les actions
-            de sauvegarde et de recovery sans ouvrir tous les droits fonctionnels sur les donnees.
+            <strong>Exam:</strong> SYSBACKUP est un ROLE Oracle, pas un privilege systeme. Il est prefere au role DBA pour RMAN car il respecte le principe du moindre privilege: l'administrateur RMAN n'a pas besoin d'acceder aux donnees applicatives.
           </div>
         </article>
       </div>
     </section>
 
     <section class="section" id="commandes">
-      <div class="page-shell columns">
+      <div class="page-shell">
         <article class="panel topic-block">
-          <h2>3. Types de commandes</h2>
-          <ul class="bullet-list">
-            <li><strong>Stand-alone command</strong>: commande executee seule.</li>
-            <li><strong>Job command</strong>: suite de commandes executees dans un bloc <span class="mono">RUN { ... }</span>.</li>
-            <li>RMAN accepte aussi des requetes SQL et meme certaines procedures PL/SQL.</li>
-          </ul>
+          <h2>3. Types de commandes RMAN</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Type</th><th>Definition</th><th>Exemples</th></tr></thead>
+              <tbody>
+                <tr><td>Commande autonome</td><td>Executee directement, hors bloc RUN.</td><td><span class="mono">SHOW ALL</span>, <span class="mono">LIST BACKUP</span>, <span class="mono">BACKUP DATABASE</span></td></tr>
+                <tr><td>Commande de job</td><td>Executee dans un bloc RUN { ... }.</td><td><span class="mono">ALLOCATE CHANNEL</span>, <span class="mono">SET UNTIL</span></td></tr>
+                <tr><td>Script RMAN</td><td>Ensemble de commandes sauvegardees (dans control file ou catalog).</td><td><span class="mono">CREATE SCRIPT</span>, <span class="mono">EXECUTE SCRIPT</span></td></tr>
+              </tbody>
+            </table>
+          </div>
 
-          <h3>Scripts RMAN</h3>
-          <p>
-            Le cours insiste sur leurs avantages: automatisation, consistance et reduction des erreurs humaines.
-          </p>
+          <span class="code-label">Bloc RUN — exemple complet</span>
+          <pre class="code-block"><code>RUN {
+  ALLOCATE CHANNEL c1 DEVICE TYPE DISK FORMAT '/backup/%U';
+  ALLOCATE CHANNEL c2 DEVICE TYPE DISK FORMAT '/backup/%U';
+  BACKUP AS BACKUPSET DATABASE;
+  SQL 'ALTER SYSTEM ARCHIVE LOG CURRENT';
+  RELEASE CHANNEL c1;
+  RELEASE CHANNEL c2;
+}</code></pre>
+
+          <span class="code-label">Scripts RMAN stockes</span>
+          <pre class="code-block"><code>-- Creer un script dans le control file ou catalog
+CREATE SCRIPT backup_quotidien {
+  BACKUP DATABASE PLUS ARCHIVELOG;
+  DELETE OBSOLETE;
+}
+
+-- Executer le script
+EXECUTE SCRIPT backup_quotidien;
+
+-- Executer un script depuis un fichier externe
+@/chemin/vers/mon_script.rman
+
+-- Lister les scripts disponibles
+LIST SCRIPT NAMES;
+
+-- Supprimer un script
+DELETE SCRIPT backup_quotidien;</code></pre>
+
+          <span class="code-label">SQL depuis RMAN</span>
+          <pre class="code-block"><code>-- Executer du SQL depuis RMAN
+SQL 'ALTER SYSTEM ARCHIVE LOG CURRENT';
+SQL 'SELECT name FROM v$datafile';
+
+-- Requete directe (certaines versions)
+SELECT name FROM v$datafile;</code></pre>
         </article>
-
-        <aside class="panel">
-          <h2>A connaitre</h2>
-          <ul class="check-list">
-            <li><span class="mono">RUN</span> pour grouper.</li>
-            <li><span class="mono">SQL</span> pour lancer des requetes Oracle.</li>
-            <li><span class="mono">SHOW</span> pour afficher les parametres.</li>
-            <li><span class="mono">CONFIGURE</span> pour modifier un parametre persistant.</li>
-          </ul>
-        </aside>
       </div>
     </section>
 
     <section class="section" id="config">
       <div class="page-shell">
         <article class="panel topic-block">
-          <h2>4. Parametres RMAN</h2>
-          <p>
-            RMAN dispose d’une configuration persistante modifiable selon les besoins. Le cours cite notamment
-            la politique de retention, les formats de sauvegarde, l’optimisation ou les copies de sauvegarde.
-          </p>
-          <ul class="bullet-list">
-            <li><span class="mono">SHOW ALL</span> affiche tous les parametres.</li>
-            <li><span class="mono">V$RMAN_CONFIGURATION</span> montre les parametres explicitement configures.</li>
-            <li><span class="mono">CONFIGURE</span> modifie un parametre.</li>
-            <li><span class="mono">CLEAR</span> remet un parametre a son comportement par defaut.</li>
-          </ul>
+          <h2>4. Configuration persistante RMAN</h2>
+          <p>Les parametres CONFIGURE sont persistants: ils survivent a la deconnexion et restent actifs pour toutes les operations futures.</p>
+
+          <span class="code-label">Afficher la configuration</span>
+          <pre class="code-block"><code>-- Afficher tous les parametres RMAN
+SHOW ALL;
+
+-- Voir les parametres explicitement configures (differents du defaut)
+SELECT name, value FROM v$rman_configuration;</code></pre>
+
+          <span class="code-label">Toutes les commandes CONFIGURE importantes</span>
+          <pre class="code-block"><code>-- Sauvegarde automatique du control file apres chaque backup
+CONFIGURE CONTROLFILE AUTOBACKUP ON;
+CONFIGURE CONTROLFILE AUTOBACKUP OFF;
+
+-- Format de l'autobackup
+CONFIGURE CONTROLFILE AUTOBACKUP FORMAT FOR DEVICE TYPE DISK TO '/backup/cf_%F';
+
+-- Type de device par defaut
+CONFIGURE DEFAULT DEVICE TYPE TO DISK;
+CONFIGURE DEFAULT DEVICE TYPE TO SBT;
+
+-- Taille maximale d'un backup set
+CONFIGURE MAXSETSIZE TO 100G;
+
+-- Optimisation (evite de sauvegarder des fichiers deja sauvegardes identiques)
+CONFIGURE BACKUP OPTIMIZATION ON;
+
+-- Nombre de canaux par defaut
+CONFIGURE DEVICE TYPE DISK PARALLELISM 2 BACKUP TYPE TO BACKUPSET;
+
+-- Remettre un parametre a sa valeur par defaut
+CONFIGURE RETENTION POLICY CLEAR;
+CONFIGURE CONTROLFILE AUTOBACKUP CLEAR;</code></pre>
         </article>
       </div>
     </section>
@@ -142,69 +201,46 @@
       <div class="page-shell">
         <article class="panel topic-block">
           <h2>5. Politique de retention</h2>
-          <p>
-            La retention policy determine quelles sauvegardes sont encore necessaires pour assurer un niveau de reprise,
-            et lesquelles deviennent obsoletes.
-          </p>
-          <ul class="bullet-list">
-            <li>Elle sert a piloter la conservation.</li>
-            <li>Elle influence le nettoyage des sauvegardes obsoletes.</li>
-            <li>Elle doit etre coherente avec le besoin metier: nombre de copies ou fenetre de recovery.</li>
-          </ul>
-        </article>
+          <p>La retention policy determine quelles sauvegardes sont encore necessaires (non obsoletes). RMAN peut ensuite nettoyer les sauvegardes obsoletes.</p>
 
-        <div class="panel">
-          <h2>Resume flash</h2>
-          <p>
-            Cette partie presente RMAN comme l’outil de reference. Ce n’est pas seulement un lanceur de backup:
-            c’est aussi un cadre de configuration, de scripts, de retention et de reprise.
-          </p>
-          <div class="button-row">
-            <a class="button-link secondary" href="tp-rman-intro.html">Voir le resume TP associe</a>
-            <a class="button-link" href="exercices-types.html#rman-intro">Voir les exercices types</a>
-            <a class="button-link ghost" href="examens-similaires.html#rman-intro">Voir les examens similaires</a>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Politique</th><th>Syntaxe</th><th>Signification</th></tr></thead>
+              <tbody>
+                <tr><td>Fenetre de recuperation</td><td><span class="mono">RECOVERY WINDOW OF n DAYS</span></td><td>Conserver les sauvegardes necessaires pour recuperer jusqu'a n jours en arriere.</td></tr>
+                <tr><td>Redondance</td><td><span class="mono">REDUNDANCY n</span></td><td>Conserver exactement n copies de chaque fichier sauvegarde.</td></tr>
+              </tbody>
+            </table>
           </div>
-        </div>
-      </div>
-    </section>
 
-    <section class="section" id="syntaxe">
-      <div class="page-shell">
-        <article class="panel topic-block">
-          <div class="study-label">Revision syntaxe</div>
-          <h2>6. Commandes du cours a memoriser</h2>
-          <div class="command-grid">
-            <div class="command-card">
-              <h3>Connexion a RMAN</h3>
-              <p>Le support donne des exemples directs de connexion a la base cible.</p>
-              <pre class="syntax-block">rman target sys/password@mydb
-rman target sys/pass@localhost:1522/orclpdb
-CONNECT TARGET user/pass@mydb</pre>
-            </div>
-            <div class="command-card">
-              <h3>SQL depuis RMAN</h3>
-              <p>Le cours dit explicitement qu'on peut lancer des requetes SQL depuis RMAN.</p>
-              <pre class="syntax-block">SQL SELECT name, dbid, log_mode FROM v$database;
-SELECT name, dbid, log_mode FROM v$database;</pre>
-            </div>
-            <div class="command-card">
-              <h3>Configuration persistante</h3>
-              <p>Les commandes de base pour lire et changer les parametres.</p>
-              <pre class="syntax-block">SHOW ALL;
-SHOW RETENTION POLICY;
-SHOW CONTROLFILE AUTOBACKUP;
-
-SELECT * FROM V$RMAN_CONFIGURATION;</pre>
-            </div>
-            <div class="command-card">
-              <h3>CONFIGURE et CLEAR</h3>
-              <p>Le cours explique que la modification tient en une ligne de commande.</p>
-              <pre class="syntax-block">CONFIGURE BACKUP OPTIMIZATION ON;
-CONFIGURE BACKUP OPTIMIZATION CLEAR;
-
+          <span class="code-label">Configurer la retention</span>
+          <pre class="code-block"><code>-- Fenetre de recuperation de 7 jours
 CONFIGURE RETENTION POLICY TO RECOVERY WINDOW OF 7 DAYS;
-CONFIGURE RETENTION POLICY TO REDUNDANCY 2;</pre>
-            </div>
+
+-- Garder 2 copies de chaque sauvegarde
+CONFIGURE RETENTION POLICY TO REDUNDANCY 2;
+
+-- Desactiver la retention (aucune sauvegarde ne devient obsolete automatiquement)
+CONFIGURE RETENTION POLICY TO NONE;</code></pre>
+
+          <span class="code-label">Gerer les sauvegardes obsoletes</span>
+          <pre class="code-block"><code>-- Voir quelles sauvegardes sont obsoletes selon la politique
+REPORT OBSOLETE;
+
+-- Supprimer les sauvegardes obsoletes
+DELETE OBSOLETE;
+
+-- Lister toutes les sauvegardes
+LIST BACKUP;
+LIST BACKUP SUMMARY;
+
+-- Lister les copies image
+LIST COPY;</code></pre>
+
+          <div class="button-row">
+            <a class="button-link secondary" href="tp-rman-intro.html">Resume TP</a>
+            <a class="button-link" href="exercices-types.html#rman-intro">Exercices types</a>
+            <a class="button-link ghost" href="examens-similaires.html#rman-intro">Examens similaires</a>
           </div>
         </article>
       </div>
@@ -213,7 +249,7 @@ CONFIGURE RETENTION POLICY TO REDUNDANCY 2;</pre>
 
   <footer class="footer">
     <div class="page-shell">
-      <div class="footer-card">Cette page est theorique et isolee du TP RMAN intro.</div>
+      <div class="footer-card">Partie 3 — Resume complet RMAN avec toutes les commandes du cours.</div>
     </div>
   </footer>
 </body>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Recovery Catalog - Resume chapitre</title>
+  <title>Recovery Catalog - Resume complet</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -15,8 +15,10 @@
       </div>
       <nav class="nav-links">
         <a href="index.html">Accueil</a>
-        <a href="exercices-types.html#catalog">Exercices types</a>
-        <a href="examens-similaires.html#catalog">Examens similaires</a>
+        <a href="exercices-types.html#catalog">Exercices</a>
+        <a href="examens-similaires.html#catalog">Examens</a>
+        <a href="chapitre-rman-intro.html">← Chap 3</a>
+        <a href="chapitre-sauvegardes-rman.html">Chap 5 →</a>
       </nav>
     </div>
   </header>
@@ -25,45 +27,34 @@
     <section class="page-header">
       <div class="page-shell">
         <div class="page-header-card">
-          <span class="eyebrow">Cours seulement</span>
+          <span class="eyebrow">Resume complet du cours</span>
           <h1>Recovery Catalog RMAN</h1>
-          <p>
-            Cette partie du cours explique quand RMAN peut se contenter du control file et quand il devient
-            preferable d’ajouter un catalogue de recuperation externe.
-          </p>
-          <div class="page-anchor-nav">
-            <a href="#concepts">Concepts</a>
-            <a href="#creation">Creation</a>
-            <a href="#gestion">Gestion</a>
-            <a href="#commandes">Commandes</a>
-          </div>
+          <p>Quand et pourquoi utiliser un catalog, comparaison avec le control file, et toutes les commandes de creation et de maintenance.</p>
         </div>
       </div>
     </section>
 
-    <section class="section" id="concepts">
+    <section class="section">
       <div class="page-shell grid grid-2">
         <article class="panel topic-block">
           <h2>1. Definition</h2>
-          <p>
-            Le recovery catalog est une base de donnees distincte dans laquelle RMAN stocke des metadonnees
-            sur les sauvegardes et les restaurations.
-          </p>
+          <p>Le recovery catalog est une base de donnees Oracle <strong>distincte</strong> dans laquelle RMAN stocke ses metadonnees: historique des sauvegardes, structure des bases enregistrees, scripts RMAN.</p>
           <ul class="bullet-list">
-            <li>Il n’est pas obligatoire pour que RMAN fonctionne.</li>
-            <li>Sans lui, RMAN peut utiliser le control file de la base cible.</li>
-            <li>Avec lui, on gagne en richesse d’historique et en flexibilite d’administration.</li>
+            <li>Il n'est pas obligatoire pour que RMAN fonctionne.</li>
+            <li>Sans lui, RMAN utilise le control file de la base cible (historique limite).</li>
+            <li>Avec lui, on gagne en richesse d'historique et en flexibilite.</li>
           </ul>
         </article>
 
         <article class="panel topic-block">
           <h2>2. Interet principal</h2>
           <ul class="bullet-list">
-            <li>Conserver l’historique des sauvegardes plus largement.</li>
-            <li>Stocker et reutiliser des scripts RMAN.</li>
-            <li>Produire des rapports personnalises.</li>
+            <li>Historique des sauvegardes plus long que ce que le control file peut stocker.</li>
+            <li>Stocker et reutiliser des scripts RMAN (partageable entre bases).</li>
             <li>Gerer plusieurs bases cibles depuis un meme referentiel.</li>
+            <li>Produire des rapports personnalises.</li>
             <li>Supporter des options comme <span class="mono">KEEP FOREVER</span>.</li>
+            <li>Survie au cas ou le control file de la cible est perdu.</li>
           </ul>
         </article>
 
@@ -71,115 +62,90 @@
           <h2>3. Control file vs Recovery Catalog</h2>
           <div class="table-wrap">
             <table>
-              <thead>
-                <tr>
-                  <th>Mode</th>
-                  <th>Forces</th>
-                  <th>Limites</th>
-                </tr>
-              </thead>
+              <thead><tr><th>Mode</th><th>Avantages</th><th>Limites</th></tr></thead>
               <tbody>
-                <tr>
-                  <td>Control file</td>
-                  <td>Simple, direct, administration plus legere</td>
-                  <td>Historique et services plus limites</td>
-                </tr>
-                <tr>
-                  <td>Recovery Catalog</td>
-                  <td>Historisation, scripts stockes, multi-cibles, rapports</td>
-                  <td>Necessite une base distincte et plus d’administration</td>
-                </tr>
+                <tr><td>Control file seul</td><td>Simple, pas de base supplementaire a administrer.</td><td>Historique limite (taille du control file). Moins de fonctionnalites.</td></tr>
+                <tr><td>Recovery Catalog</td><td>Historique complet, scripts stockes, multi-bases, rapports avances, KEEP FOREVER.</td><td>Necessite une base supplementaire et son administration.</td></tr>
               </tbody>
             </table>
           </div>
         </article>
 
-        <article class="panel topic-block" id="creation">
-          <h2>4. Creation logique</h2>
-          <ol class="bullet-list">
-            <li>Preparer la base qui accueillera le catalogue.</li>
-            <li>Creer le proprietaire du catalogue avec le privilege <span class="mono">RECOVERY_CATALOG_OWNER</span>.</li>
-            <li>Creer ensuite le catalogue lui-meme.</li>
-          </ol>
-          <p class="muted">
-            Le cours souligne qu’il faut aussi dimensionner l’espace selon le nombre de bases et de sauvegardes suivies.
-          </p>
-        </article>
-      </div>
-
-      <div class="page-shell" id="gestion">
-        <div class="panel topic-block">
-          <div class="revision-banner">
-            <strong>Point fort revision:</strong>
-            pour ce chapitre, l'examen demande souvent a quoi sert le catalog et quelles sont les operations de gestion autour de lui.
-          </div>
-          <h2>5. Gestion logique du catalog</h2>
-          <ul class="bullet-list">
-            <li>Enregistrer une base cible dans le catalog.</li>
-            <li>Retirer une base cible du catalog.</li>
-            <li>Resynchroniser les metadonnees entre control file et catalog.</li>
-            <li>Cataloguer des fichiers de sauvegarde additionnels.</li>
-            <li>Dans le cas du VPC, ajouter ou retirer l'acces avec des commandes de type GRANT et REVOKE.</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="page-shell" id="commandes">
         <article class="panel topic-block">
-          <div class="study-label">Revision syntaxe</div>
-          <h2>6. Commandes du cours a memoriser</h2>
-          <div class="command-grid">
-            <div class="command-card">
-              <h3>Preparation du proprietaire</h3>
-              <p>Le support impose un owner avec un tablespace dedie et le privilege du catalog.</p>
-              <pre class="syntax-block">CREATE USER rman IDENTIFIED BY motdepasse
-DEFAULT TABLESPACE rman_cat_ts
-QUOTA UNLIMITED ON rman_cat_ts;
-
-GRANT RECOVERY_CATALOG_OWNER TO rman;</pre>
-            </div>
-            <div class="command-card">
-              <h3>Creation du catalog</h3>
-              <p>Commande explicitement citee dans le support.</p>
-              <pre class="syntax-block">CREATE CATALOG;</pre>
-            </div>
-            <div class="command-card">
-              <h3>Gestion courante</h3>
-              <p>Le cours cite ces operations de gestion autour du recovery catalog.</p>
-              <pre class="syntax-block">REGISTER DATABASE;
-UNREGISTER DATABASE;
-RESYNC CATALOG;</pre>
-            </div>
-            <div class="command-card">
-              <h3>VPC et suppression</h3>
-              <p>Le support mentionne GRANT/REVOKE pour VPC et la suppression avec DROP CATALOG.</p>
-              <pre class="syntax-block">GRANT ... TO vpc_owner;
-REVOKE ... FROM vpc_owner;
-DROP CATALOG;</pre>
-            </div>
-          </div>
+          <h2>4. Creation du catalog — etapes completes</h2>
+          <ol class="bullet-list">
+            <li>Preparer une base Oracle qui va heberger le catalog (base distincte).</li>
+            <li>Creer un utilisateur proprietaire avec un tablespace dedie et suffisamment d'espace.</li>
+            <li>Accorder le role <span class="mono">RECOVERY_CATALOG_OWNER</span>.</li>
+            <li>Se connecter a RMAN avec la cible ET le catalog.</li>
+            <li>Creer le catalog.</li>
+            <li>Enregistrer chaque base cible.</li>
+          </ol>
         </article>
       </div>
 
       <div class="page-shell">
-        <div class="panel">
-          <h2>Resume flash</h2>
-          <p>
-            Retenir surtout ceci: le recovery catalog n’est pas une sauvegarde de la base applicative.
-            C’est un depot de metadonnees RMAN, utile pour mieux piloter, historiser et mutualiser les operations.
-          </p>
-          <div class="button-row">
-            <a class="button-link" href="exercices-types.html#catalog">Voir les exercices types</a>
-            <a class="button-link ghost" href="examens-similaires.html#catalog">Voir les examens similaires</a>
+        <article class="panel topic-block" style="margin-top:18px">
+          <h2>5. Commandes de creation et maintenance</h2>
+
+          <span class="code-label">Creer l'utilisateur et le role</span>
+          <pre class="code-block"><code>-- Sur la base du catalog (pas la base cible)
+CREATE USER rcat_owner IDENTIFIED BY password
+  DEFAULT TABLESPACE rcat_ts
+  QUOTA UNLIMITED ON rcat_ts;
+
+-- Accorder le role necessaire
+GRANT RECOVERY_CATALOG_OWNER TO rcat_owner;
+GRANT CREATE SESSION TO rcat_owner;</code></pre>
+
+          <span class="code-label">Connexion RMAN avec le catalog</span>
+          <pre class="code-block"><code>-- Connexion avec base cible ET catalog
+rman TARGET / CATALOG rcat_owner/password@catdb
+
+-- Ou depuis l'invite RMAN
+rman
+CONNECT TARGET /
+CONNECT CATALOG rcat_owner/password@catdb</code></pre>
+
+          <span class="code-label">Creer le catalog et enregistrer la base</span>
+          <pre class="code-block"><code>-- Creer le schema du catalog (a faire une seule fois)
+CREATE CATALOG;
+
+-- Enregistrer la base cible dans le catalog
+REGISTER DATABASE;
+
+-- Verifier l'enregistrement
+LIST DB_UNIQUE_NAME ALL;</code></pre>
+
+          <span class="code-label">Maintenance du catalog</span>
+          <pre class="code-block"><code>-- Synchroniser le catalog avec le control file de la cible
+RESYNC CATALOG;
+
+-- Synchroniser manuellement depuis un control file specifique
+RESYNC CATALOG FROM CONTROLFILECOPY '/backup/cf_backup.ctl';
+
+-- Mettre a jour le catalog (apres mise a jour RMAN)
+UPGRADE CATALOG;
+
+-- Deregistrer une base (la retirer du catalog)
+UNREGISTER DATABASE;</code></pre>
+
+          <div class="callout">
+            <strong>A retenir:</strong> Le recovery catalog stocke des metadonnees RMAN, pas les donnees applicatives. C'est un depot de references, pas une sauvegarde de la base elle-meme.
           </div>
-        </div>
+
+          <div class="button-row">
+            <a class="button-link" href="exercices-types.html#catalog">Exercices types</a>
+            <a class="button-link ghost" href="examens-similaires.html#catalog">Examens similaires</a>
+          </div>
+        </article>
       </div>
     </section>
   </main>
 
   <footer class="footer">
     <div class="page-shell">
-      <div class="footer-card">Partie theorique du recovery catalog, sans integration de TP.</div>
+      <div class="footer-card">Partie 4 — Resume complet Recovery Catalog avec toutes les commandes.</div>
     </div>
   </footer>
 </body>

@@ -89,6 +89,17 @@
           </ul>
         </article>
 
+        <article class="exercise-card" id="flashback">
+          <h3>Flashback Technology</h3>
+          <ul class="bullet-list">
+            <li><strong>Question:</strong> Difference entre Flashback Query et Flashback Table ?<br><strong>Resultat:</strong> Flashback Query (<span class="mono">AS OF</span>) lit les donnees a un instant passe sans modification. Flashback Table remet reellement les donnees de la table dans un etat passe (modifie les donnees).</li>
+            <li><strong>Question:</strong> Qu'est-ce que Flashback Drop ?<br><strong>Resultat:</strong> Permet de recuperer une table supprimee depuis la corbeille (recyclebin) si elle n'a pas ete purgee.</li>
+            <li><strong>Question:</strong> Quel prerequis doit-on activer avant d'utiliser FLASHBACK TABLE ?<br><strong>Resultat:</strong> <span class="mono">ALTER TABLE nom_table ENABLE ROW MOVEMENT;</span></li>
+            <li><strong>Question:</strong> Qu'est-ce qu'un Guaranteed Restore Point ?<br><strong>Resultat:</strong> Un restore point qui garantit que les flashback logs necessaires ne seront pas ecrases, assurant la disponibilite du point de retour jusqu'a sa suppression explicite.</li>
+            <li><strong>Question:</strong> Difference entre Flashback Database et RMAN PITR ?<br><strong>Resultat:</strong> Flashback Database utilise les flashback logs (plus rapide). RMAN PITR restaure une sauvegarde et rejoue les archives (plus lent mais peut aller plus loin dans le temps).</li>
+          </ul>
+        </article>
+
         <article class="exercise-card" id="listener">
           <h3>Listener et alias</h3>
           <ul class="bullet-list">

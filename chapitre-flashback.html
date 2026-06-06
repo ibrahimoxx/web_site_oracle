@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flashback Technology - Resume complet</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-mark">Partie 7</span>
+        <span class="brand-title">Flashback Technology</span>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html">Accueil</a>
+        <a href="exercices-types.html#flashback">Exercices</a>
+        <a href="examens-similaires.html#flashback">Examens</a>
+        <a href="chapitre-restauration-rman.html">← Chap 6</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-header">
+      <div class="page-shell">
+        <div class="page-header-card">
+          <span class="eyebrow">Resume complet du cours</span>
+          <h1>Flashback Technology — 6 fonctionnalites</h1>
+          <p>Flashback Query, Version Query, Transaction Query, Table, Drop, Database et Restore Points — tout le chapitre avec la syntaxe SQL exacte.</p>
+          <div class="page-anchor-nav">
+            <a href="#overview">Vue d'ensemble</a>
+            <a href="#query">Flashback Query</a>
+            <a href="#version">Version Query</a>
+            <a href="#transaction">Transaction Query</a>
+            <a href="#table">Flashback Table</a>
+            <a href="#drop">Flashback Drop</a>
+            <a href="#database">Flashback Database</a>
+            <a href="#restore">Restore Points</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="overview">
+      <div class="page-shell">
+        <article class="panel topic-block">
+          <h2>Vue d'ensemble — comparaison des fonctionnalites</h2>
+          <p>La technologie Flashback Oracle exploite les <strong>segments Undo</strong> pour retrouver des etats passes des donnees, sans restauration de sauvegarde. Flashback Database utilise en plus les <strong>flashback logs</strong>.</p>
+
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Fonctionnalite</th><th>Granularite</th><th>Prerequis</th><th>Reversibilite</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Flashback Query</strong></td><td>Lignes a un instant T</td><td>UNDO_RETENTION suffisant</td><td>Requete seule, aucune modification</td></tr>
+                <tr><td><strong>Flashback Version Query</strong></td><td>Historique d'une ligne entre T1 et T2</td><td>UNDO_RETENTION suffisant</td><td>Requete seule, aucune modification</td></tr>
+                <tr><td><strong>Flashback Transaction Query</strong></td><td>Toutes les modifications d'une transaction</td><td>UNDO_RETENTION + SUPPLEMENTAL LOGGING</td><td>Requete seule, genere le SQL d'annulation</td></tr>
+                <tr><td><strong>Flashback Table</strong></td><td>Une ou plusieurs tables</td><td>UNDO_RETENTION + ENABLE ROW MOVEMENT</td><td>Oui — remet les donnees en etat passe</td></tr>
+                <tr><td><strong>Flashback Drop</strong></td><td>Table supprimee (dans la corbeille)</td><td>Corbeille non videe (PURGE)</td><td>Oui — recupere la table supprimee</td></tr>
+                <tr><td><strong>Flashback Database</strong></td><td>Toute la base</td><td>ARCHIVELOG + Flashback ON + FRA</td><td>Oui — mais requiert OPEN RESETLOGS</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="query">
+      <div class="page-shell">
+        <article class="panel topic-block">
+          <h2>1. Flashback Query (AS OF)</h2>
+          <p>Interroge les donnees telles qu'elles existaient a un moment passe (timestamp ou SCN). Basee sur les donnees Undo. La requete est en lecture seule: elle ne modifie pas les donnees actuelles.</p>
+
+          <span class="code-label">Syntaxe</span>
+          <pre class="code-block"><code>-- Par timestamp
+SELECT * FROM employees
+  AS OF TIMESTAMP TO_TIMESTAMP('2026-06-06 13:00:00', 'YYYY-MM-DD HH24:MI:SS');
+
+-- Par SCN
+SELECT * FROM employees
+  AS OF SCN 1498000;
+
+-- Retrouver des lignes supprimees accidentellement
+SELECT * FROM orders
+  AS OF TIMESTAMP (SYSTIMESTAMP - INTERVAL '2' HOUR)
+WHERE order_id = 1001;</code></pre>
+
+          <span class="code-label">Parametres Undo a verifier</span>
+          <pre class="code-block"><code>-- Verifier la retention Undo configuree
+SHOW PARAMETER undo_retention;
+
+-- Verifier le tablespace Undo
+SHOW PARAMETER undo_tablespace;
+
+-- La periode de retention en secondes (900 = 15 minutes par defaut)
+SELECT value FROM v$parameter WHERE name = 'undo_retention';</code></pre>
+
+          <div class="callout">
+            <strong>Limite:</strong> Flashback Query ne fonctionne que si les donnees Undo sont encore disponibles dans le tablespace UNDO. Si UNDO_RETENTION est trop court ou que l'espace Undo a ete reutilise, la requete echoue avec ORA-01555 (snapshot too old).
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="version">
+      <div class="page-shell">
+        <article class="panel topic-block">
+          <h2>2. Flashback Version Query (VERSIONS BETWEEN)</h2>
+          <p>Montre toutes les versions successives d'une ligne entre deux instants. Retourne une ligne par modification de la ligne dans la periode donnee. Utile pour comprendre l'historique complet des modifications.</p>
+
+          <span class="code-label">Syntaxe</span>
+          <pre class="code-block"><code>-- Historique d'une ligne entre deux timestamps
+SELECT versions_starttime, versions_endtime,
+       versions_operation, versions_xid,
+       employee_id, salary
+FROM employees
+  VERSIONS BETWEEN TIMESTAMP
+    TO_TIMESTAMP('2026-06-06 12:00:00','YYYY-MM-DD HH24:MI:SS')
+    AND
+    TO_TIMESTAMP('2026-06-06 15:00:00','YYYY-MM-DD HH24:MI:SS')
+WHERE employee_id = 100;
+
+-- Par SCN
+SELECT versions_startscn, versions_endscn, versions_operation, salary
+FROM employees
+  VERSIONS BETWEEN SCN 1400000 AND 1600000
+WHERE employee_id = 100;</code></pre>
+
+          <span class="code-label">Pseudo-colonnes disponibles</span>
+          <pre class="code-block"><code>VERSIONS_STARTTIME   -- Timestamp de debut de cette version
+VERSIONS_ENDTIME     -- Timestamp de fin de cette version
+VERSIONS_STARTSCN    -- SCN de debut
+VERSIONS_ENDSCN      -- SCN de fin
+VERSIONS_OPERATION   -- I (insert), U (update), D (delete)
+VERSIONS_XID         -- Transaction ID</code></pre>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="transaction">
+      <div class="page-shell">
+        <article class="panel topic-block">
+          <h2>3. Flashback Transaction Query</h2>
+          <p>Retrouve toutes les modifications effectuees par une transaction specifique. Fournit le SQL d'annulation (UNDO_SQL) pour annuler selectivement une transaction. Necessite que le Supplemental Logging soit active.</p>
+
+          <span class="code-label">Activer le Supplemental Logging</span>
+          <pre class="code-block"><code>-- Activer le Supplemental Logging minimal (necessaire pour UNDO_SQL)
+ALTER DATABASE ADD SUPPLEMENTAL LOG DATA;</code></pre>
+
+          <span class="code-label">Interroger FLASHBACK_TRANSACTION_QUERY</span>
+          <pre class="code-block"><code>-- Voir toutes les operations d'une transaction via son XID
+SELECT xid, operation, start_timestamp, commit_timestamp,
+       logon_user, undo_sql
+FROM flashback_transaction_query
+WHERE xid = HEXTORAW('0002000300000076');
+
+-- Trouver le XID d'une transaction via Flashback Version Query
+-- (utiliser VERSIONS_XID de la requete VERSIONS BETWEEN)
+
+-- Afficher le SQL d'annulation genere automatiquement
+SELECT undo_sql FROM flashback_transaction_query
+WHERE xid = HEXTORAW('0002000300000076')
+ORDER BY seq DESC;</code></pre>
+
+          <div class="callout">
+            <strong>Usage typique:</strong> 1) Identifier la transaction fautive via <span class="mono">VERSIONS BETWEEN</span> (recuperer VERSIONS_XID). 2) Interroger <span class="mono">FLASHBACK_TRANSACTION_QUERY</span> avec ce XID pour obtenir le SQL d'annulation. 3) Executer le SQL d'annulation pour corriger les donnees.
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="table">
+      <div class="page-shell">
+        <article class="panel topic-block">
+          <h2>4. Flashback Table</h2>
+          <p>Remet une ou plusieurs tables dans leur etat a un instant passe (timestamp ou SCN). Modifie reellement les donnees de la table. La table doit avoir <span class="mono">ROW MOVEMENT</span> active.</p>
+
+          <span class="code-label">Prerequis et preparation</span>
+          <pre class="code-block"><code>-- Activer ROW MOVEMENT sur la table (prerequis obligatoire)
+ALTER TABLE employees ENABLE ROW MOVEMENT;
+
+-- Verifier
+SELECT row_movement FROM dba_tables WHERE table_name = 'EMPLOYEES';</code></pre>
+
+          <span class="code-label">Syntaxe Flashback Table</span>
+          <pre class="code-block"><code>-- Flashback par timestamp
+FLASHBACK TABLE employees
+  TO TIMESTAMP TO_TIMESTAMP('2026-06-06 13:00:00','YYYY-MM-DD HH24:MI:SS');
+
+-- Flashback par SCN
+FLASHBACK TABLE employees TO SCN 1498000;
+
+-- Flashback de plusieurs tables simultanement
+FLASHBACK TABLE employees, departments
+  TO TIMESTAMP TO_TIMESTAMP('2026-06-06 13:00:00','YYYY-MM-DD HH24:MI:SS');
+
+-- Flashback vers un restore point nomme
+FLASHBACK TABLE employees TO RESTORE POINT avant_maj;</code></pre>
+
+          <div class="callout danger">
+            <strong>Important:</strong> <span class="mono">FLASHBACK TABLE</span> modifie les donnees actuelles. Sauvegarder ou noter l'etat courant avant d'executer si necessaire. L'operation est irreversible sans une autre Flashback Table vers l'etat precedent.
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="drop">
+      <div class="page-shell">
+        <article class="panel topic-block">
+          <h2>5. Flashback Drop (Corbeille)</h2>
+          <p>Oracle ne supprime pas immediatement les tables avec <span class="mono">DROP TABLE</span>: il les place dans la <strong>corbeille</strong> (RECYCLEBIN). Flashback Drop permet de les restaurer.</p>
+
+          <span class="code-label">Verifier et lister la corbeille</span>
+          <pre class="code-block"><code>-- Verifier le contenu de la corbeille (objets supprimes)
+SELECT object_name, original_name, type, droptime
+FROM recyclebin
+ORDER BY droptime DESC;
+
+-- Ou via DBA_RECYCLEBIN (pour les administrateurs, toutes les corbeilles)
+SELECT owner, object_name, original_name, type, droptime
+FROM dba_recyclebin;</code></pre>
+
+          <span class="code-label">Restaurer une table depuis la corbeille</span>
+          <pre class="code-block"><code>-- Restaurer sous le nom d'origine
+FLASHBACK TABLE employees TO BEFORE DROP;
+
+-- Restaurer en renommant
+FLASHBACK TABLE employees TO BEFORE DROP RENAME TO employees_restored;
+
+-- Si plusieurs versions du meme nom existent dans la corbeille :
+-- utiliser le nom de la corbeille (objet renomme en BIN$...)
+FLASHBACK TABLE "BIN$xqTpY+9bQdugQKjH0rHKhA==$0" TO BEFORE DROP;</code></pre>
+
+          <span class="code-label">Gestion de la corbeille</span>
+          <pre class="code-block"><code>-- Vider la corbeille de la session courante
+PURGE RECYCLEBIN;
+
+-- Vider une table specifique de la corbeille
+PURGE TABLE employees;
+
+-- DROP TABLE sans passer par la corbeille (purge immediate)
+DROP TABLE employees PURGE;
+
+-- Activer/desactiver la corbeille au niveau systeme
+ALTER SYSTEM SET recyclebin = ON;
+ALTER SYSTEM SET recyclebin = OFF;
+
+-- Verifier
+SHOW PARAMETER recyclebin;</code></pre>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="database">
+      <div class="page-shell">
+        <article class="panel topic-block">
+          <h2>6. Flashback Database</h2>
+          <p>Revient a un etat passe de <strong>toute la base</strong>, similaire a un PITR mais beaucoup plus rapide car utilise les flashback logs au lieu des archived logs. Necessite l'activation prealable et une FRA configuree.</p>
+
+          <span class="code-label">Activer Flashback Database</span>
+          <pre class="code-block"><code>-- Prerequis : FRA configuree et mode ARCHIVELOG
+ALTER SYSTEM SET db_recovery_file_dest = '/u01/app/oracle/fra';
+ALTER SYSTEM SET db_recovery_file_dest_size = 20G;
+
+-- Activer Flashback Database (base doit etre en MOUNT)
+SHUTDOWN IMMEDIATE;
+STARTUP MOUNT;
+ALTER DATABASE FLASHBACK ON;
+ALTER DATABASE OPEN;
+
+-- Verifier
+SELECT flashback_on FROM v$database;
+
+-- Configurer la retention des flashback logs (en minutes, defaut 1440 = 24h)
+ALTER SYSTEM SET db_flashback_retention_target = 2880;  -- 48 heures</code></pre>
+
+          <span class="code-label">Utiliser Flashback Database</span>
+          <pre class="code-block"><code>-- 1. Mettre la base en MOUNT
+SHUTDOWN IMMEDIATE;
+STARTUP MOUNT;
+
+-- 2. Flashback vers un timestamp
+FLASHBACK DATABASE TO TIMESTAMP
+  TO_TIMESTAMP('2026-06-06 12:00:00','YYYY-MM-DD HH24:MI:SS');
+
+-- Ou vers un SCN
+FLASHBACK DATABASE TO SCN 1400000;
+
+-- Ou vers un restore point nomme
+FLASHBACK DATABASE TO RESTORE POINT avant_migration;
+
+-- 3. Ouvrir la base avec RESETLOGS (obligatoire)
+ALTER DATABASE OPEN RESETLOGS;</code></pre>
+
+          <div class="callout">
+            <strong>Avantage vs PITR RMAN:</strong> Flashback Database est beaucoup plus rapide car il rejoue les flashback logs (journaux des blocs avant modification) au lieu de restaurer toute une sauvegarde et de rejouer des archives. Ideal pour les retours rapides.
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="restore">
+      <div class="page-shell">
+        <article class="panel topic-block">
+          <h2>7. Restore Points</h2>
+          <p>Un restore point est un <strong>alias nomme</strong> associe a un SCN precis. Permet de designer un point de retour par un nom significatif au lieu d'un timestamp ou SCN numerique. Deux types: normal et garanti.</p>
+
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Type</th><th>Description</th><th>Retention</th></tr></thead>
+              <tbody>
+                <tr><td>Restore Point normal</td><td>Alias d'un SCN. Valide tant que les donnees Undo ou flashback logs necessaires sont disponibles.</td><td>Limitee (depend de UNDO_RETENTION et flashback logs).</td></tr>
+                <tr><td>Guaranteed Restore Point</td><td>Oracle garantit que les flashback logs necessaires ne seront pas ecrases. Toujours disponible.</td><td>Permanente jusqu'a suppression explicite.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <span class="code-label">Creer et utiliser des Restore Points</span>
+          <pre class="code-block"><code>-- Creer un restore point normal
+CREATE RESTORE POINT avant_migration;
+
+-- Creer un guaranteed restore point (necessite Flashback Database actif)
+CREATE RESTORE POINT avant_migration GUARANTEE FLASHBACK DATABASE;
+
+-- Voir les restore points disponibles
+SELECT name, scn, time, guarantee_flashback_database
+FROM v$restore_point;
+
+-- Utiliser un restore point pour Flashback Database
+FLASHBACK DATABASE TO RESTORE POINT avant_migration;
+
+-- Utiliser un restore point pour Flashback Table
+FLASHBACK TABLE employees TO RESTORE POINT avant_migration;
+
+-- Supprimer un restore point
+DROP RESTORE POINT avant_migration;</code></pre>
+
+          <div class="callout danger">
+            <strong>Garanteed Restore Point:</strong> Puisque les flashback logs ne peuvent pas etre ecrases, un Guaranteed Restore Point peut remplir l'espace FRA si on oublie de le supprimer. Toujours le supprimer apres usage.
+          </div>
+
+          <div class="button-row">
+            <a class="button-link" href="exercices-types.html#flashback">Exercices types</a>
+            <a class="button-link ghost" href="examens-similaires.html#flashback">Examens similaires</a>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="page-shell">
+      <div class="footer-card">Partie 7 — Resume complet Flashback Technology avec les 6 fonctionnalites et toutes les commandes.</div>
+    </div>
+  </footer>
+</body>
+</html>

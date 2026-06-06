@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sauvegardes avec RMAN - Resume chapitre</title>
+  <title>Sauvegardes RMAN - Resume complet</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,13 +11,15 @@
     <div class="topbar-inner">
       <div class="brand">
         <span class="brand-mark">Partie 5</span>
-        <span class="brand-title">Sauvegardes avec RMAN</span>
+        <span class="brand-title">Sauvegardes RMAN</span>
       </div>
       <nav class="nav-links">
         <a href="index.html">Accueil</a>
-        <a href="tp-sauvegardes-rman.html">Resume TP</a>
-        <a href="exercices-types.html#backup-rman">Exercices types</a>
-        <a href="examens-similaires.html#backup-rman">Examens similaires</a>
+        <a href="tp-sauvegardes-rman.html">TP</a>
+        <a href="exercices-types.html#backup-rman">Exercices</a>
+        <a href="examens-similaires.html#backup-rman">Examens</a>
+        <a href="chapitre-recovery-catalog.html">← Chap 4</a>
+        <a href="chapitre-restauration-rman.html">Chap 6 →</a>
       </nav>
     </div>
   </header>
@@ -26,161 +28,238 @@
     <section class="page-header">
       <div class="page-shell">
         <div class="page-header-card">
-          <span class="eyebrow">Cours seulement</span>
-          <h1>Strategie et types de sauvegardes avec RMAN</h1>
-          <p>
-            Ici, le cours passe de l’outil RMAN a la conception de vraies sauvegardes:
-            quoi sauvegarder, sous quelle forme, a quelle frequence et avec quelle strategie.
-          </p>
+          <span class="eyebrow">Resume complet du cours</span>
+          <h1>Strategies et types de sauvegardes avec RMAN</h1>
+          <p>Types de backup, formes, commandes BACKUP completes, compression, chiffrement — tout le cours avec la syntaxe exacte.</p>
           <div class="page-anchor-nav">
-            <a href="#strategie">Strategie</a>
-            <a href="#types">Types</a>
-            <a href="#options">Options</a>
-            <a href="#commandes">Commandes</a>
+            <a href="#types">Types de backup</a>
+            <a href="#commandes">Commandes BACKUP</a>
+            <a href="#compression">Compression</a>
+            <a href="#chiffrement">Chiffrement</a>
+            <a href="#maintenance">Maintenance</a>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="section" id="strategie">
-      <div class="page-shell grid grid-2">
-        <article class="panel topic-block">
-          <h2>1. Strategie de sauvegarde</h2>
-          <ul class="bullet-list">
-            <li>Une strategie doit couvrir le besoin metier en disponibilite et en reprise.</li>
-            <li>Elle depend du volume de stockage disponible, du type de base et du temps acceptable de restauration.</li>
-            <li>Elle peut viser toute la base (<span class="mono">whole</span>) ou seulement une partie (<span class="mono">partial</span>).</li>
-          </ul>
-        </article>
-
-        <article class="panel topic-block" id="types">
-          <h2>2. Types de backup</h2>
-          <ul class="bullet-list">
-            <li><strong>Full backup</strong>: tous les blocs utilises des fichiers vises.</li>
-            <li><strong>Incremental level 0</strong>: equivalent logique d’une base de reference complete.</li>
-            <li><strong>Incremental level 1 cumulative</strong>: changements depuis le dernier niveau 0.</li>
-            <li><strong>Incremental level 1 differentielle</strong>: changements depuis le dernier incremental precedent.</li>
-          </ul>
-        </article>
-
-        <article class="panel topic-block">
-          <h2>3. Modes et formes de sauvegarde</h2>
-          <ul class="bullet-list">
-            <li><strong>Offline</strong>: sauvegarde a froid, base arretee, donc coherente.</li>
-            <li><strong>Online</strong>: sauvegarde a chaud, base en service.</li>
-            <li><strong>Image copy</strong>: copie directe des fichiers, plus lourde en espace mais plus rapide a restaurer.</li>
-            <li><strong>Backup set</strong>: format binaire plus compact, mais necessite une reconstruction lors de la reprise.</li>
-            <li><strong>Proxy copy</strong>: appui sur un outil externe de sauvegarde.</li>
-          </ul>
-        </article>
-
-        <article class="panel topic-block">
-          <h2>4. Ce qui peut etre inclus</h2>
-          <ul class="bullet-list">
-            <li>Base complete.</li>
-            <li>PDB ou tablespace specifique.</li>
-            <li>Archived redo logs.</li>
-            <li>Control files et spfile.</li>
-          </ul>
-        </article>
-
-        <article class="panel topic-block" id="options">
-          <h2>5. Options de sauvegarde</h2>
-          <ul class="bullet-list">
-            <li><strong>Compression</strong>: moins d’espace, cout de traitement supplementaire.</li>
-            <li><strong>Cryptage</strong>: protection de la confidentialite des sauvegardes.</li>
-            <li><strong>Block change tracking</strong>: facilite les incrementaux en suivant les blocs modifies.</li>
-          </ul>
-        </article>
-
-        <article class="panel topic-block">
-          <h2>6. Choix d’une bonne strategie</h2>
-          <p>
-            Le cours insiste sur le fait qu’il n’existe pas une strategie unique optimale.
-            Il faut arbitrer entre rapidite de backup, rapidite de restore, espace consomme
-            et niveau de protection voulu.
-          </p>
-        </article>
-      </div>
-
-      <div class="page-shell" id="commandes">
-        <article class="panel topic-block">
-          <div class="study-label">Revision syntaxe</div>
-          <div class="revision-banner">
-            <strong>Point fort revision:</strong>
-            ce chapitre tombe souvent en mode "donner la commande de backup", donc la syntaxe doit etre visible et facile a relire.
-          </div>
-          <h2>7. Commandes du cours a memoriser</h2>
-          <div class="command-grid">
-            <div class="command-card">
-              <h3>Structure et sauvegardes globales</h3>
-              <p>Ce sont les commandes les plus directement rattachees au support.</p>
-              <pre class="syntax-block">REPORT SCHEMA;
-BACKUP DATABASE;
-BACKUP DATABASE PLUS ARCHIVELOG;
-BACKUP DATABASE SKIP READONLY;</pre>
-            </div>
-            <div class="command-card">
-              <h3>CDB, PDB et tablespace</h3>
-              <p>Le cours insiste sur la sauvegarde totale ou partielle.</p>
-              <pre class="syntax-block">BACKUP PLUGGABLE DATABASE nom_pdb;
-BACKUP TABLESPACE users;
-BACKUP TABLESPACE nom_pdb:users;</pre>
-            </div>
-            <div class="command-card">
-              <h3>Incremental</h3>
-              <p>Le support parle explicitement du niveau 0 et du tag d'incremental.</p>
-              <pre class="syntax-block">BACKUP INCREMENTAL LEVEL 0 DATABASE;
-BACKUP INCREMENTAL LEVEL 1 TAG 'daily_inc' DATABASE;</pre>
-            </div>
-            <div class="command-card">
-              <h3>Image copy et backup set</h3>
-              <p>Deux formes de sauvegarde a savoir reconnaitre.</p>
-              <pre class="syntax-block">BACKUP AS COPY DATAFILE '/chemin/datafile.dbf';
-BACKUP AS COPY ARCHIVELOG LIKE 'arch%';
-BACKUP AS BACKUPSET TABLESPACE users;</pre>
-            </div>
-            <div class="command-card">
-              <h3>Control file, compression et chiffrement</h3>
-              <p>Le cours associe ces options a la strategie de protection.</p>
-              <pre class="syntax-block">CONFIGURE CONTROLFILE AUTOBACKUP ON;
-BACKUP AS COMPRESSED BACKUPSET DATABASE;
-SET ENCRYPTION ON IDENTIFIED BY 'motdepasse' ONLY;</pre>
-            </div>
-            <div class="command-card">
-              <h3>Lecture d'examen</h3>
-              <p>Pour ce chapitre, sais relier chaque commande a son but.</p>
-              <ul class="signal-list">
-                <li><span class="note-chip">REPORT SCHEMA</span> pour voir datafiles et tablespaces.</li>
-                <li><span class="note-chip">BACKUP AS COPY</span> pour image copy.</li>
-                <li><span class="note-chip">BACKUP AS BACKUPSET</span> pour ensemble compresse/logique.</li>
-                <li><span class="note-chip">LEVEL 0 / LEVEL 1</span> pour incremental.</li>
-              </ul>
-            </div>
-          </div>
-        </article>
-      </div>
-
+    <section class="section" id="types">
       <div class="page-shell">
-        <div class="panel">
-          <h2>Resume flash</h2>
-          <p>
-            Full, level 0, cumulative, differentielle, image copy et backup set sont des notions centrales.
-            L’examen peut demander la difference theorique, le bon cas d’usage ou le compromis espace/temps.
-          </p>
-          <div class="button-row">
-            <a class="button-link secondary" href="tp-sauvegardes-rman.html">Voir le resume TP associe</a>
-            <a class="button-link" href="exercices-types.html#backup-rman">Voir les exercices types</a>
-            <a class="button-link ghost" href="examens-similaires.html#backup-rman">Voir les examens similaires</a>
+        <article class="panel topic-block">
+          <h2>1. Types et formats de sauvegarde</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Type</th><th>Definition</th><th>Usage</th></tr></thead>
+              <tbody>
+                <tr><td>Full backup</td><td>Sauvegarde tous les blocs utilises des fichiers vises. N'est pas une base pour les incrementaux.</td><td>Sauvegarde complete independante.</td></tr>
+                <tr><td>Incremental level 0</td><td>Sauvegarde tous les blocs utilises. Sert de base de reference pour les sauvegardes incrementales.</td><td>Point de depart de la strategie incrementale.</td></tr>
+                <tr><td>Incremental level 1 differentielle</td><td>Sauvegarde les blocs modifies depuis le dernier incremental (level 0 ou level 1).</td><td>Restore: rejoue level 0 + tous les level 1 differentiels.</td></tr>
+                <tr><td>Incremental level 1 cumulative</td><td>Sauvegarde les blocs modifies depuis le dernier level 0.</td><td>Restore: rejoue level 0 + dernier level 1 cumulatif seulement.</td></tr>
+                <tr><td>Image copy</td><td>Copie physique exacte des fichiers (datafiles, archived logs). Restauration plus rapide.</td><td>Quand la vitesse de restore prime sur l'espace.</td></tr>
+                <tr><td>Backup set</td><td>Format RMAN compresse et compact. Moins d'espace mais restauration plus lente.</td><td>Quand l'espace de stockage est contraint.</td></tr>
+                <tr><td>Proxy copy</td><td>Delegue la sauvegarde a un outil externe via un MML (Media Management Library).</td><td>Environnements avec librairies de bandes tierces.</td></tr>
+              </tbody>
+            </table>
           </div>
-        </div>
+
+          <div class="callout">
+            <strong>Exam — difference cle:</strong> Incremental level 1 <strong>differentielle</strong> = depuis le dernier incremental (level 0 OU level 1). Incremental level 1 <strong>cumulative</strong> = toujours depuis le dernier level 0. La cumulative necessite moins de sauvegardes pour le restore mais est plus volumineuse.
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="commandes">
+      <div class="page-shell">
+        <article class="panel topic-block">
+          <h2>2. Commandes BACKUP — syntaxe complete</h2>
+
+          <span class="code-label">Sauvegardes de la base entiere</span>
+          <pre class="code-block"><code>-- Sauvegarde complete de la base
+BACKUP DATABASE;
+
+-- Sauvegarde avec les archived redo logs (recommande)
+BACKUP DATABASE PLUS ARCHIVELOG;
+
+-- Ignorer les tablespaces en lecture seule
+BACKUP DATABASE SKIP READONLY;
+
+-- Voir la structure de la base avant de sauvegarder
+REPORT SCHEMA;</code></pre>
+
+          <span class="code-label">Sauvegardes partielles</span>
+          <pre class="code-block"><code>-- Sauvegarde d'un tablespace specifique
+BACKUP TABLESPACE users;
+BACKUP TABLESPACE users, example;
+
+-- Sauvegarde d'un datafile specifique
+BACKUP DATAFILE 4;
+BACKUP DATAFILE '/oradata/users_01.dbf';
+
+-- Sauvegarde des archived redo logs seulement
+BACKUP ARCHIVELOG ALL;
+BACKUP ARCHIVELOG FROM SCN 100000 UNTIL SCN 200000;</code></pre>
+
+          <span class="code-label">Sauvegardes CDB/PDB (multitenant)</span>
+          <pre class="code-block"><code>-- Sauvegarde d'une PDB specifique
+BACKUP PLUGGABLE DATABASE hr_pdb;
+
+-- Sauvegarde du CDB$ROOT
+BACKUP PLUGGABLE DATABASE "CDB$ROOT";
+
+-- Sauvegarde de toutes les PDB + CDB
+BACKUP DATABASE;</code></pre>
+
+          <span class="code-label">Sauvegardes incrementales</span>
+          <pre class="code-block"><code>-- Level 0 : base de reference (tous les blocs utilises)
+BACKUP INCREMENTAL LEVEL 0 DATABASE;
+
+-- Level 1 differentielle (depuis le dernier incremental, level 0 ou 1)
+BACKUP INCREMENTAL LEVEL 1 DATABASE;
+
+-- Level 1 cumulative (depuis le dernier level 0)
+BACKUP INCREMENTAL LEVEL 1 CUMULATIVE DATABASE;</code></pre>
+
+          <span class="code-label">Image copies</span>
+          <pre class="code-block"><code>-- Copie image d'un datafile
+BACKUP AS COPY DATAFILE '/oradata/users_01_db01.dbf';
+
+-- Copie image de tous les archived logs correspondant a un motif
+BACKUP AS COPY ARCHIVELOG LIKE '/arch%';
+
+-- Copie image de la base entiere
+BACKUP AS COPY DATABASE;</code></pre>
+
+          <span class="code-label">Backup sets avec format</span>
+          <pre class="code-block"><code>-- Backup set simple
+BACKUP AS BACKUPSET DATABASE;
+
+-- Backup set avec format de nommage personnalise
+BACKUP AS BACKUPSET
+  FORMAT '/backup/df_%d_%s_%p.bkp'
+  TABLESPACE hr_data;
+
+-- Backup set avec format et plus archivelog
+BACKUP AS BACKUPSET DATABASE
+  FORMAT '/backup/%d_%T_%U'
+  PLUS ARCHIVELOG;</code></pre>
+
+          <span class="code-label">Dans un bloc RUN avec canal dedie</span>
+          <pre class="code-block"><code>RUN {
+  ALLOCATE CHANNEL c1 DEVICE TYPE DISK FORMAT '/backup/%U';
+  BACKUP DATABASE PLUS ARCHIVELOG;
+  BACKUP CURRENT CONTROLFILE;
+  DELETE OBSOLETE;
+}</code></pre>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="compression">
+      <div class="page-shell">
+        <article class="panel topic-block">
+          <h2>3. Compression des sauvegardes</h2>
+          <p>La compression reduit l'espace occupe par les sauvegardes au prix d'une consommation CPU supplementaire. Plus l'algorithme est puissant, plus il compresse mais plus il consomme de CPU.</p>
+
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Algorithme</th><th>Compression</th><th>CPU</th><th>Usage recommande</th></tr></thead>
+              <tbody>
+                <tr><td><span class="mono">BASIC</span></td><td>Faible</td><td>Faible</td><td>Defaut, bon equilibre.</td></tr>
+                <tr><td><span class="mono">LOW</span></td><td>Basse</td><td>Tres faible</td><td>Sauvegarde rapide, peu de CPU disponible.</td></tr>
+                <tr><td><span class="mono">MEDIUM</span></td><td>Moyenne</td><td>Moyen</td><td>Bon equilibre espace/CPU.</td></tr>
+                <tr><td><span class="mono">HIGH</span></td><td>Elevee</td><td>Eleve</td><td>Espace critique, CPU disponible.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <span class="code-label">Configurer et utiliser la compression</span>
+          <pre class="code-block"><code>-- Configurer l'algorithme par defaut (persistant)
+CONFIGURE COMPRESSION ALGORITHM 'BASIC';
+CONFIGURE COMPRESSION ALGORITHM 'LOW';
+CONFIGURE COMPRESSION ALGORITHM 'MEDIUM';
+CONFIGURE COMPRESSION ALGORITHM 'HIGH';
+
+-- Sauvegarde compressee avec l'algorithme configure
+BACKUP AS COMPRESSED BACKUPSET DATABASE PLUS ARCHIVELOG;
+
+-- Sauvegarde compressee avec algorithme specifie dans le bloc RUN
+RUN {
+  SET COMPRESSION ALGORITHM 'HIGH';
+  BACKUP AS COMPRESSED BACKUPSET DATABASE PLUS ARCHIVELOG;
+}</code></pre>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="chiffrement">
+      <div class="page-shell">
+        <article class="panel topic-block">
+          <h2>4. Chiffrement des sauvegardes</h2>
+          <p>Le chiffrement protege la confidentialite des sauvegardes. Indispensable si les supports de sauvegarde quittent les locaux ou sont stockes dans le cloud.</p>
+
+          <span class="code-label">Chiffrement avec mot de passe</span>
+          <pre class="code-block"><code>-- Chiffrer la sauvegarde avec un mot de passe
+SET ENCRYPTION IDENTIFIED BY 'mon_mot_de_passe' ONLY;
+BACKUP DATABASE PLUS ARCHIVELOG;
+
+-- Lors de la restauration, fournir le mot de passe de dechiffrement
+SET DECRYPTION IDENTIFIED BY 'mon_mot_de_passe';
+RESTORE DATABASE;
+RECOVER DATABASE;</code></pre>
+
+          <div class="callout danger">
+            <strong>Important:</strong> Sans le mot de passe de chiffrement, une sauvegarde chiffree est inutilisable. Stocker le mot de passe en lieu sur, separe des sauvegardes elles-memes.
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="maintenance">
+      <div class="page-shell">
+        <article class="panel topic-block">
+          <h2>5. Maintenance des sauvegardes</h2>
+
+          <span class="code-label">Lister et verifier</span>
+          <pre class="code-block"><code>-- Lister toutes les sauvegardes
+LIST BACKUP;
+LIST BACKUP SUMMARY;
+
+-- Lister les copies image
+LIST COPY;
+
+-- Verifier que les sauvegardes sont accessibles sur le disque
+CROSSCHECK BACKUP;
+CROSSCHECK ARCHIVELOG ALL;
+
+-- Verifier une sauvegarde specifique
+CROSSCHECK BACKUP OF DATABASE;</code></pre>
+
+          <span class="code-label">Nettoyer les sauvegardes</span>
+          <pre class="code-block"><code>-- Supprimer les sauvegardes expiredees (fichiers inaccessibles)
+DELETE EXPIRED BACKUP;
+
+-- Supprimer les sauvegardes obsoletes (selon la politique de retention)
+DELETE OBSOLETE;
+
+-- Supprimer les archived logs deja sauvegardes au moins une fois
+DELETE ARCHIVELOG ALL BACKED UP 1 TIMES TO DISK;
+
+-- Supprimer une sauvegarde specifique
+DELETE BACKUPSET 5;</code></pre>
+
+          <div class="button-row">
+            <a class="button-link secondary" href="tp-sauvegardes-rman.html">Resume TP</a>
+            <a class="button-link" href="exercices-types.html#backup-rman">Exercices types</a>
+            <a class="button-link ghost" href="examens-similaires.html#backup-rman">Examens similaires</a>
+          </div>
+        </article>
       </div>
     </section>
   </main>
 
   <footer class="footer">
     <div class="page-shell">
-      <div class="footer-card">Resume theorique des sauvegardes RMAN, sans contenu TP.</div>
+      <div class="footer-card">Partie 5 — Resume complet sauvegardes RMAN avec toutes les commandes.</div>
     </div>
   </footer>
 </body>

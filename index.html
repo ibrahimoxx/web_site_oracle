@@ -21,6 +21,7 @@
         <a href="chapitre-recovery-catalog.html">Recovery Catalog</a>
         <a href="chapitre-sauvegardes-rman.html">Sauvegardes RMAN</a>
         <a href="chapitre-restauration-rman.html">Recovery RMAN</a>
+        <a href="chapitre-flashback.html">Flashback</a>
         <a href="chapitre-listener-alias.html">Listener</a>
       </nav>
     </div>
@@ -40,7 +41,7 @@
 
           <div class="key-grid">
             <div class="key-stat">
-              <strong>7</strong>
+              <strong>8</strong>
               parties du module
             </div>
             <div class="key-stat">
@@ -169,6 +170,18 @@
 
           <article class="chapter-card">
             <div class="meta-line">
+              <span class="pill">Partie 7</span>
+              <span class="pill secondary">Flashback</span>
+            </div>
+            <h3>Flashback Technology</h3>
+            <p>Flashback Query, Version Query, Transaction Query, Table, Drop, Database et Restore Points — recuperation sans restauration via les segments Undo.</p>
+            <div class="button-row">
+              <a class="button-link" href="chapitre-flashback.html">Voir le resume</a>
+            </div>
+          </article>
+
+          <article class="chapter-card">
+            <div class="meta-line">
               <span class="pill">Partie reseau</span>
               <span class="pill secondary">Oracle Net</span>
             </div>
@@ -251,6 +264,18 @@
           </article>
 
           <article class="summary-card">
+            <h3>7. Flashback Technology</h3>
+            <ul class="bullet-list">
+              <li>Flashback exploite les segments Undo pour retrouver des etats passes sans restauration de sauvegarde.</li>
+              <li>Flashback Query (<span class="mono">AS OF</span>) lit des donnees a un instant passe. Version Query (<span class="mono">VERSIONS BETWEEN</span>) montre l'historique complet d'une ligne.</li>
+              <li>Flashback Transaction Query interroge <span class="mono">FLASHBACK_TRANSACTION_QUERY</span> et fournit le SQL d'annulation d'une transaction specifique.</li>
+              <li>Flashback Table remet une table dans son etat passe (necessite <span class="mono">ENABLE ROW MOVEMENT</span>). Flashback Drop recupere une table depuis la corbeille.</li>
+              <li>Flashback Database revient a un etat passe de toute la base via les flashback logs (necessite <span class="mono">ALTER DATABASE FLASHBACK ON</span> et une FRA).</li>
+              <li>Les Restore Points sont des alias nommes d'un SCN. Les Guaranteed Restore Points garantissent que les flashback logs necessaires ne seront pas ecrases.</li>
+            </ul>
+          </article>
+
+          <article class="summary-card">
             <h3>6. Restore &amp; recover RMAN</h3>
             <ul class="bullet-list">
               <li><span class="mono">RESTORE</span> replace les fichiers depuis une sauvegarde. <span class="mono">RECOVER</span> applique redo et archives pour les remettre au bon etat.</li>
@@ -309,8 +334,12 @@
             <p><span class="mono">REPORT SCHEMA</span>, <span class="mono">BACKUP DATABASE</span>, <span class="mono">BACKUP PLUGGABLE DATABASE</span>, <span class="mono">BACKUP AS COPY</span>, <span class="mono">BACKUP AS BACKUPSET</span>.</p>
           </div>
           <div class="focus-card">
-            <strong>Recovery RMAN et reseau</strong>
-            <p><span class="mono">RESTORE</span>, <span class="mono">RECOVER</span>, <span class="mono">RUN { SET UNTIL ... }</span>, <span class="mono">lsnrctl status</span>, <span class="mono">sqlplus user/password@alias</span>.</p>
+            <strong>Recovery RMAN</strong>
+            <p><span class="mono">RESTORE</span>, <span class="mono">RECOVER</span>, <span class="mono">RUN { SET UNTIL ... }</span>, <span class="mono">ALTER DATABASE OPEN RESETLOGS</span>.</p>
+          </div>
+          <div class="focus-card">
+            <strong>Flashback Technology</strong>
+            <p><span class="mono">AS OF TIMESTAMP</span>, <span class="mono">VERSIONS BETWEEN</span>, <span class="mono">FLASHBACK TABLE</span>, <span class="mono">FLASHBACK DROP</span>, <span class="mono">FLASHBACK DATABASE</span>, <span class="mono">CREATE RESTORE POINT</span>.</p>
           </div>
         </div>
       </div>

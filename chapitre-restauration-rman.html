@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Restauration et recuperation RMAN - Resume chapitre</title>
+  <title>Restauration RMAN - Resume complet</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,13 +11,15 @@
     <div class="topbar-inner">
       <div class="brand">
         <span class="brand-mark">Partie 6</span>
-        <span class="brand-title">Restauration &amp; recovery RMAN</span>
+        <span class="brand-title">Restauration RMAN</span>
       </div>
       <nav class="nav-links">
         <a href="index.html">Accueil</a>
-        <a href="tp-restauration-rman.html">Resume TP</a>
-        <a href="exercices-types.html#recovery-rman">Exercices types</a>
-        <a href="examens-similaires.html#recovery-rman">Examens similaires</a>
+        <a href="tp-restauration-rman.html">TP</a>
+        <a href="exercices-types.html#restauration-rman">Exercices</a>
+        <a href="examens-similaires.html#restauration-rman">Examens</a>
+        <a href="chapitre-sauvegardes-rman.html">← Chap 5</a>
+        <a href="chapitre-flashback.html">Chap 7 →</a>
       </nav>
     </div>
   </header>
@@ -26,152 +28,314 @@
     <section class="page-header">
       <div class="page-shell">
         <div class="page-header-card">
-          <span class="eyebrow">Cours seulement</span>
-          <h1>Restauration et recuperation avec RMAN</h1>
-          <p>
-            Cette partie montre comment RMAN est utilise quand la panne est deja la:
-            fichiers critiques perdus, recuperation complete ou incomplete, control file de sauvegarde
-            et spfile a restaurer.
-          </p>
+          <span class="eyebrow">Resume complet du cours</span>
+          <h1>Restauration et recuperation RMAN — 7 scenarios</h1>
+          <p>Chaque scenario de restauration avec la sequence complete de commandes, les prerequis et les points d'attention exam.</p>
           <div class="page-anchor-nav">
-            <a href="#principes">Principes</a>
-            <a href="#complete">Complete</a>
-            <a href="#incomplete">Incomplete</a>
-            <a href="#commandes">Commandes</a>
+            <a href="#principe">Principe</a>
+            <a href="#s1">Tablespace</a>
+            <a href="#s2">SYSTEM/UNDO</a>
+            <a href="#s3">Base complete</a>
+            <a href="#s4">PITR date</a>
+            <a href="#s5">PITR SCN</a>
+            <a href="#s6">Control file</a>
+            <a href="#s7">SPFILE</a>
+            <a href="#maintenance">Maintenance</a>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="section" id="principes">
-      <div class="page-shell grid grid-2">
+    <section class="section" id="principe">
+      <div class="page-shell">
         <article class="panel topic-block">
-          <h2>1. Principe general</h2>
-          <ul class="bullet-list">
-            <li><span class="mono">RESTORE</span> remet en place les fichiers depuis la sauvegarde.</li>
-            <li><span class="mono">RECOVER</span> applique les modifications necessaires via redo ou archives.</li>
-            <li>Le couple restore + recover constitue la logique de reprise complete.</li>
-          </ul>
-        </article>
-
-        <article class="panel topic-block" id="complete">
-          <h2>2. Recuperation complete</h2>
-          <p>
-            L’objectif est de revenir a l’etat le plus a jour possible de la base
-            en appliquant toutes les modifications valides disponibles.
-          </p>
-          <ul class="bullet-list">
-            <li>Souvent utilise apres perte d’un datafile critique.</li>
-            <li>Peut necessiter un montage de la base avant la reprise.</li>
-          </ul>
-        </article>
-
-        <article class="panel topic-block" id="incomplete">
-          <h2>3. Recuperation incomplete</h2>
-          <p>
-            On vise un point precis dans le temps, un SCN ou un moment donne. Elle sert quand on ne veut
-            pas rejouer toutes les modifications ou quand certaines sont perdues ou inde desirables.
-          </p>
-          <ul class="bullet-list">
-            <li>Elle est pilotee par un critere d’arret (<span class="mono">UNTIL TIME</span>, <span class="mono">UNTIL SCN</span>, etc.).</li>
-            <li>L’ouverture de la base apres une telle reprise impose souvent <span class="mono">RESETLOGS</span>.</li>
-          </ul>
-        </article>
-
-        <article class="panel topic-block">
-          <h2>4. Cas cites par le cours</h2>
-          <ul class="bullet-list">
-            <li>Perte d’un fichier de donnees critique.</li>
-            <li>Recuperation a partir d’un fichier de controle de sauvegarde.</li>
-            <li>Restauration du spfile depuis une sauvegarde automatique.</li>
-          </ul>
-        </article>
-
-        <article class="panel topic-block">
-          <h2>5. Control file de sauvegarde</h2>
-          <p>
-            Si le control file restaure n’est pas a jour, il faut resynchroniser la base via une recuperation,
-            puis ouvrir souvent avec <span class="mono">RESETLOGS</span>. Cela cree une nouvelle incarnation logique.
-          </p>
-        </article>
-
-        <article class="panel topic-block">
-          <h2>6. Spfile</h2>
-          <p>
-            Le cours montre que RMAN peut aider a restaurer le spfile, meme dans un contexte ou l’instance
-            ne demarre pas normalement, en s’appuyant sur des sauvegardes automatiques et parfois sur le DBID.
-          </p>
+          <h2>Principe general — Restore puis Recover</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Etape</th><th>Commande</th><th>Ce qui se passe</th></tr></thead>
+              <tbody>
+                <tr><td>1. Restaurer</td><td><span class="mono">RESTORE</span></td><td>RMAN recopie le fichier de sauvegarde vers l'emplacement cible. Fichier present mais potentiellement ancien.</td></tr>
+                <tr><td>2. Recuperer</td><td><span class="mono">RECOVER</span></td><td>RMAN applique les archived redo logs et les redo logs en ligne pour avancer le fichier jusqu'a l'etat coherent le plus recent.</td></tr>
+                <tr><td>3. Ouvrir</td><td><span class="mono">ALTER DATABASE OPEN</span> ou <span class="mono">OPEN RESETLOGS</span></td><td>Recuperation complete → OPEN. Recuperation incomplete (PITR) → OPEN RESETLOGS (cree une nouvelle incarnation).</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout danger">
+            <strong>Regle absolue:</strong> Apres toute recuperation incomplete (PITR, toute utilisation de <span class="mono">SET UNTIL</span>), il est OBLIGATOIRE d'utiliser <span class="mono">ALTER DATABASE OPEN RESETLOGS</span>. Utiliser <span class="mono">ALTER DATABASE OPEN</span> seul causerait une incoherence.
+          </div>
         </article>
       </div>
+    </section>
 
-      <div class="page-shell" id="commandes">
+    <section class="section" id="s1">
+      <div class="page-shell">
         <article class="panel topic-block">
-          <div class="study-label">Revision syntaxe</div>
-          <div class="revision-banner">
-            <strong>Point fort revision:</strong>
-            ici, la difference entre complete et incomplete doit etre comprise et vue en commandes.
+          <h2>Scenario 1 — Recuperation d'un tablespace non critique</h2>
+          <p>Le tablespace n'est pas SYSTEM ni UNDO. La base peut rester ouverte. Le tablespace est mis OFFLINE, restaure, recupere, puis remis ONLINE.</p>
+
+          <span class="code-label">Sequence complete</span>
+          <pre class="code-block"><code>-- 1. Mettre le tablespace offline immediatement
+ALTER TABLESPACE users OFFLINE IMMEDIATE;
+
+-- 2. Restaurer et recuperer (base ouverte, RMAN se connecte normalement)
+rman TARGET /
+
+RESTORE TABLESPACE users;
+RECOVER TABLESPACE users;
+
+-- 3. Remettre le tablespace en ligne
+ALTER TABLESPACE users ONLINE;</code></pre>
+
+          <div class="callout">
+            <strong>Remarque:</strong> Si un datafile specifique est endommage et non tout le tablespace, utiliser <span class="mono">RESTORE DATAFILE n; RECOVER DATAFILE n;</span> avec le fichier mis <span class="mono">OFFLINE</span> au prealable.
           </div>
-          <h2>7. Commandes du cours a memoriser</h2>
-          <div class="command-grid">
-            <div class="command-card">
-              <h3>Recuperation complete d'un datafile critique</h3>
-              <p>Le support donne ce scenario explicitement pour le tablespace SYSTEM.</p>
-              <pre class="syntax-block">RMAN TARGET '/ AS SYSBACKUP'
-SHUTDOWN ABORT
-STARTUP FORCE MOUNT
-RESTORE TABLESPACE SYSTEM;
-RECOVER TABLESPACE SYSTEM;
-ALTER DATABASE OPEN;</pre>
-            </div>
-            <div class="command-card">
-              <h3>Recuperation incomplete</h3>
-              <p>Le cours fournit un bloc <span class="mono">RUN</span> avec <span class="mono">SET UNTIL TIME</span>.</p>
-              <pre class="syntax-block">RUN {
-  STARTUP MOUNT;
-  SET UNTIL TIME = TO_DATE('05-05-24 02:48:36', 'dd-mm-yy hh24:mi:ss');
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="s2">
+      <div class="page-shell">
+        <article class="panel topic-block">
+          <h2>Scenario 2 — Recuperation du tablespace SYSTEM ou UNDO</h2>
+          <p>Le tablespace SYSTEM ou UNDO ne peut pas etre mis offline avec la base ouverte. La base doit etre en mode MOUNT pour la restauration.</p>
+
+          <span class="code-label">Sequence complete</span>
+          <pre class="code-block"><code>-- 1. Arreter la base proprement
+SHUTDOWN ABORT;   -- ou IMMEDIATE si la base repond encore
+
+-- 2. Monter la base (pas OPEN)
+STARTUP MOUNT;
+
+-- 3. Restaurer et recuperer
+rman TARGET /
+
+RESTORE TABLESPACE system;
+RECOVER TABLESPACE system;
+-- (ou TABLESPACE undotbs1 selon le cas)
+
+-- 4. Ouvrir la base
+ALTER DATABASE OPEN;</code></pre>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="s3">
+      <div class="page-shell">
+        <article class="panel topic-block">
+          <h2>Scenario 3 — Recuperation complete de la base</h2>
+          <p>Tous les datafiles sont endommages ou perdus. Recuperation complete jusqu'au dernier commit possible.</p>
+
+          <span class="code-label">Sequence complete</span>
+          <pre class="code-block"><code>-- 1. Arreter la base
+SHUTDOWN ABORT;
+
+-- 2. Monter la base
+STARTUP MOUNT;
+
+-- 3. Restaurer puis recuperer toute la base
+rman TARGET /
+
+RESTORE DATABASE;
+RECOVER DATABASE;
+
+-- 4. Ouvrir la base (recuperation complete → pas de RESETLOGS)
+ALTER DATABASE OPEN;</code></pre>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="s4">
+      <div class="page-shell">
+        <article class="panel topic-block">
+          <h2>Scenario 4 — Recuperation incomplete PITR par date (timestamp)</h2>
+          <p>Revenir a un point dans le temps specifique, exprime par une date. Exemple : annuler une suppression accidentelle intervenue a 14h30.</p>
+
+          <span class="code-label">Sequence complete</span>
+          <pre class="code-block"><code>-- 1. Arreter la base
+SHUTDOWN IMMEDIATE;
+
+-- 2. Monter la base
+STARTUP MOUNT;
+
+-- 3. RMAN : definir le point cible et recuperer
+rman TARGET /
+
+RUN {
+  SET UNTIL TIME "TO_DATE('2026-06-06 14:30:00','YYYY-MM-DD HH24:MI:SS')";
   RESTORE DATABASE;
   RECOVER DATABASE;
-  ALTER DATABASE OPEN RESETLOGS;
-}</pre>
-            </div>
-            <div class="command-card">
-              <h3>Control file de sauvegarde</h3>
-              <p>Le support dit de restaurer le control file, lancer recover puis ouvrir en RESETLOGS.</p>
-              <pre class="syntax-block">RESTORE CONTROLFILE FROM AUTOBACKUP;
-RECOVER DATABASE;
-ALTER DATABASE OPEN RESETLOGS;</pre>
-            </div>
-            <div class="command-card">
-              <h3>Spfile depuis autobackup</h3>
-              <p>Le cours consacre aussi une slide a cette restauration.</p>
-              <pre class="syntax-block">RESTORE SPFILE FROM AUTOBACKUP;
-STARTUP FORCE;</pre>
-            </div>
+}
+
+-- 4. Ouvrir avec RESETLOGS (OBLIGATOIRE apres PITR)
+ALTER DATABASE OPEN RESETLOGS;</code></pre>
+
+          <div class="callout danger">
+            <strong>Exam:</strong> Apres toute recuperation avec <span class="mono">SET UNTIL</span>, l'ouverture se fait uniquement avec <span class="mono">OPEN RESETLOGS</span>. Jamais avec <span class="mono">OPEN</span> seul.
           </div>
         </article>
       </div>
+    </section>
 
+    <section class="section" id="s5">
       <div class="page-shell">
-        <div class="panel">
-          <h2>Resume flash</h2>
-          <p>
-            L’idee centrale est la suivante: en recovery, RMAN doit retrouver les bons fichiers, les restaurer,
-            les remettre a jour, puis rouvrir la base de maniere coherente. L’examen aime surtout les differences
-            complete/incomplete et le role de <span class="mono">RESETLOGS</span>.
-          </p>
-          <div class="button-row">
-            <a class="button-link secondary" href="tp-restauration-rman.html">Voir le resume TP associe</a>
-            <a class="button-link" href="exercices-types.html#recovery-rman">Voir les exercices types</a>
-            <a class="button-link ghost" href="examens-similaires.html#recovery-rman">Voir les examens similaires</a>
+        <article class="panel topic-block">
+          <h2>Scenario 5 — Recuperation incomplete PITR par SCN</h2>
+          <p>Revenir a un SCN (System Change Number) specifique. Plus precis qu'une date. Utile quand le SCN de l'evenement est connu (ex: via Flashback Query).</p>
+
+          <span class="code-label">Sequence complete</span>
+          <pre class="code-block"><code>-- 1. Arreter la base
+SHUTDOWN IMMEDIATE;
+
+-- 2. Monter la base
+STARTUP MOUNT;
+
+-- 3. RMAN : definir le SCN cible et recuperer
+rman TARGET /
+
+RUN {
+  SET UNTIL SCN 1500000;
+  RESTORE DATABASE;
+  RECOVER DATABASE;
+}
+
+-- 4. Ouvrir avec RESETLOGS
+ALTER DATABASE OPEN RESETLOGS;</code></pre>
+
+          <span class="code-label">Trouver un SCN utile avant la recuperation</span>
+          <pre class="code-block"><code>-- SCN actuel de la base
+SELECT current_scn FROM v$database;
+
+-- Via Flashback Query pour verifier l'etat a un SCN
+SELECT * FROM employees AS OF SCN 1499000;</code></pre>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="s6">
+      <div class="page-shell">
+        <article class="panel topic-block">
+          <h2>Scenario 6 — Recuperation du control file depuis un autobackup</h2>
+          <p>Tous les control files sont perdus. RMAN peut les restaurer depuis l'autobackup si <span class="mono">CONFIGURE CONTROLFILE AUTOBACKUP ON</span> etait actif.</p>
+
+          <span class="code-label">Sequence complete</span>
+          <pre class="code-block"><code>-- 1. La base ne peut pas demarrer normalement : lancer NOMOUNT
+STARTUP NOMOUNT;
+
+-- 2. Depuis RMAN, restaurer le control file
+rman TARGET /
+
+-- Restauration automatique (RMAN cherche dans la FRA)
+RESTORE CONTROLFILE FROM AUTOBACKUP;
+
+-- Ou specifier le chemin exact si l'autobackup est dans un repertoire precis
+RESTORE CONTROLFILE FROM AUTOBACKUP
+  RECOVERY AREA '/u01/app/oracle/fra'
+  DB_NAME 'ORCL';
+
+-- 3. Monter la base (maintenant que les control files sont la)
+ALTER DATABASE MOUNT;
+
+-- 4. Restaurer et recuperer la base
+RESTORE DATABASE;
+RECOVER DATABASE;
+
+-- 5. Ouvrir avec RESETLOGS
+ALTER DATABASE OPEN RESETLOGS;</code></pre>
+
+          <div class="callout danger">
+            <strong>Ordre des etapes:</strong> NOMOUNT → RESTORE CONTROLFILE → MOUNT → RESTORE DATABASE → RECOVER DATABASE → OPEN RESETLOGS. Ne jamais inverser NOMOUNT et MOUNT.
           </div>
-        </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="s7">
+      <div class="page-shell">
+        <article class="panel topic-block">
+          <h2>Scenario 7 — Recuperation du SPFILE depuis un autobackup</h2>
+          <p>Le fichier de parametres SPFILE est perdu. La base ne peut plus demarrer. RMAN peut le restaurer si l'autobackup du control file etait actif (il inclut aussi le SPFILE).</p>
+
+          <span class="code-label">Sequence complete</span>
+          <pre class="code-block"><code>-- 1. Demarrer en NOMOUNT avec un PFILE minimal (ou le PFILE par defaut)
+-- Oracle cree un PFILE minimal si aucun SPFILE ni PFILE n'est trouve
+STARTUP NOMOUNT;
+
+-- 2. Depuis RMAN, restaurer le SPFILE
+rman TARGET /
+
+RESTORE SPFILE FROM AUTOBACKUP;
+
+-- Ou depuis un chemin explicite
+RESTORE SPFILE FROM AUTOBACKUP
+  RECOVERY AREA '/u01/app/oracle/fra'
+  DB_NAME 'ORCL';
+
+-- 3. Redemarrer pour utiliser le SPFILE restaure
+SHUTDOWN IMMEDIATE;
+STARTUP;</code></pre>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="maintenance">
+      <div class="page-shell">
+        <article class="panel topic-block">
+          <h2>Commandes de maintenance et de verification</h2>
+
+          <span class="code-label">Verifier l'integrite des sauvegardes</span>
+          <pre class="code-block"><code>-- Verifier les sauvegardes (detecte les blocs corrompus)
+RESTORE DATABASE VALIDATE;
+RESTORE TABLESPACE users VALIDATE;
+
+-- Verifier un fichier specifique
+RESTORE DATAFILE 4 VALIDATE;
+
+-- Verifier les archived logs
+RESTORE ARCHIVELOG ALL VALIDATE;</code></pre>
+
+          <span class="code-label">Recuperer depuis un emplacement different</span>
+          <pre class="code-block"><code>-- Specifier un emplacement de sortie different
+RUN {
+  SET NEWNAME FOR DATABASE TO '/newpath/%b';
+  RESTORE DATABASE;
+  SWITCH DATAFILE ALL;
+  RECOVER DATABASE;
+}
+
+-- Ou pour un datafile specifique
+RUN {
+  SET NEWNAME FOR DATAFILE '/oradata/users01.dbf' TO '/newdisk/users01.dbf';
+  RESTORE DATAFILE '/oradata/users01.dbf';
+  SWITCH DATAFILE ALL;
+  RECOVER DATAFILE '/newdisk/users01.dbf';
+}</code></pre>
+
+          <span class="code-label">Consulter l'historique des operations</span>
+          <pre class="code-block"><code>-- Historique des jobs RMAN
+SELECT * FROM v$rman_backup_job_details ORDER BY start_time DESC;
+
+-- Liste des sauvegardes disponibles
+LIST BACKUP;
+LIST BACKUP SUMMARY;
+LIST BACKUP OF DATABASE;
+LIST BACKUP OF TABLESPACE users;
+
+-- Verifier les archived logs disponibles
+LIST ARCHIVELOG ALL;</code></pre>
+
+          <div class="button-row">
+            <a class="button-link secondary" href="tp-restauration-rman.html">Resume TP</a>
+            <a class="button-link" href="exercices-types.html#restauration-rman">Exercices types</a>
+            <a class="button-link ghost" href="examens-similaires.html#restauration-rman">Examens similaires</a>
+          </div>
+        </article>
       </div>
     </section>
   </main>
 
   <footer class="footer">
     <div class="page-shell">
-      <div class="footer-card">Page theorique de recovery RMAN, sans reutiliser le detail du TP.</div>
+      <div class="footer-card">Partie 6 — Resume complet restauration RMAN avec les 7 scenarios et toutes les commandes.</div>
     </div>
   </footer>
 </body>

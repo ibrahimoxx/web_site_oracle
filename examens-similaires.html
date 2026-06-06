@@ -103,10 +103,34 @@
       </div>
     </section>
 
+    <section class="section" id="flashback">
+      <div class="page-shell grid grid-2">
+        <article class="exercise-card">
+          <h3>Examen similaire G — Flashback</h3>
+          <ul class="bullet-list">
+            <li><strong>Q1.</strong> Qu'est-ce que Flashback Query ? Quelle clause SQL utilise-t-on ?<br><strong>Resultat:</strong> Interroge les donnees telles qu'elles existaient a un instant passe. Clause : <span class="mono">AS OF TIMESTAMP</span> ou <span class="mono">AS OF SCN</span>.</li>
+            <li><strong>Q2.</strong> Quel est le prerequis obligatoire pour FLASHBACK TABLE ?<br><strong>Resultat:</strong> Activer <span class="mono">ROW MOVEMENT</span> : <span class="mono">ALTER TABLE t ENABLE ROW MOVEMENT;</span></li>
+            <li><strong>Q3.</strong> Comment recuperer une table supprimee accidentellement ?<br><strong>Resultat:</strong> <span class="mono">FLASHBACK TABLE nom TO BEFORE DROP;</span> (a condition que la corbeille ne soit pas purgee).</li>
+            <li><strong>Q4.</strong> Que fait <span class="mono">DROP TABLE t PURGE</span> par rapport a <span class="mono">DROP TABLE t</span> ?<br><strong>Resultat:</strong> <span class="mono">PURGE</span> supprime definitivement la table sans passer par la corbeille, rendant Flashback Drop impossible.</li>
+          </ul>
+        </article>
+
+        <article class="exercise-card">
+          <h3>Examen similaire H — Flashback Database</h3>
+          <ul class="bullet-list">
+            <li><strong>Q1.</strong> Quelles sont les conditions pour activer Flashback Database ?<br><strong>Resultat:</strong> Mode ARCHIVELOG actif, FRA configuree (<span class="mono">db_recovery_file_dest</span> et taille), puis <span class="mono">ALTER DATABASE FLASHBACK ON</span> en mode MOUNT.</li>
+            <li><strong>Q2.</strong> Quelle commande ouvre la base apres un FLASHBACK DATABASE ?<br><strong>Resultat:</strong> <span class="mono">ALTER DATABASE OPEN RESETLOGS;</span> — RESETLOGS est obligatoire.</li>
+            <li><strong>Q3.</strong> Difference entre Restore Point normal et Guaranteed Restore Point ?<br><strong>Resultat:</strong> Normal: valide tant que les flashback logs sont disponibles. Guaranteed: Oracle garantit de ne pas ecraser les logs necessaires jusqu'a suppression explicite du restore point.</li>
+            <li><strong>Q4.</strong> Quel vue montre si Flashback Database est active ?<br><strong>Resultat:</strong> <span class="mono">SELECT flashback_on FROM v$database;</span></li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
     <section class="section" id="listener">
       <div class="page-shell">
         <article class="exercise-card">
-          <h3>Examen similaire G</h3>
+          <h3>Examen similaire I</h3>
           <ul class="bullet-list">
             <li><strong>Q1.</strong> Quel est le role d’un alias TNS ?<br><strong>Resultat:</strong> Fournir un nom simple qui encapsule les details de connexion.</li>
             <li><strong>Q2.</strong> Quelle commande utilise-t-on pour verifier l’etat du listener ?<br><strong>Resultat:</strong> <span class="mono">lsnrctl status</span>.</li>

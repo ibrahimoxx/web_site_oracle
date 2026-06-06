@@ -15,9 +15,11 @@
       </div>
       <nav class="nav-links">
         <a href="index.html">Accueil</a>
-        <a href="tp-backup-recovery.html">Resume TP</a>
-        <a href="exercices-types.html#backup">Exercices types</a>
-        <a href="examens-similaires.html#backup">Examens similaires</a>
+        <a href="tp-backup-recovery.html">TP</a>
+        <a href="exercices-types.html#backup">Exercices</a>
+        <a href="examens-similaires.html#backup">Examens</a>
+        <a href="chapitre-utilisateurs.html">← Chap 1</a>
+        <a href="chapitre-rman-intro.html">Chap 3 →</a>
       </nav>
     </div>
   </header>
@@ -26,20 +28,17 @@
     <section class="page-header">
       <div class="page-shell">
         <div class="page-header-card">
-          <span class="eyebrow">Cours seulement</span>
+          <span class="eyebrow">Resume complet du cours</span>
           <h1>Sauvegarde et recuperation</h1>
-          <p>
-            Ce chapitre installe le vocabulaire central du module: types de pannes, restauration,
-            recuperation, recuperation automatique de l’instance, recuperation complete ou incomplete,
-            et configuration de base pour proteger la base.
-          </p>
+          <p>Pannes, restore vs recover, instance recovery, ARCHIVELOG, FRA, control files, redo logs — tout le vocabulaire central avec les commandes exactes.</p>
           <div class="page-anchor-nav">
-            <a href="#dba">Role du DBA</a>
+            <a href="#dba">Role DBA</a>
             <a href="#pannes">Pannes</a>
-            <a href="#restore-recover">Restore vs recover</a>
+            <a href="#restore-recover">Restore vs Recover</a>
             <a href="#instance">Instance recovery</a>
-            <a href="#config">Configuration</a>
-            <a href="#commandes">Commandes</a>
+            <a href="#archivelog">ARCHIVELOG</a>
+            <a href="#fra">FRA</a>
+            <a href="#fichiers">Fichiers critiques</a>
           </div>
         </div>
       </div>
@@ -50,19 +49,19 @@
         <article class="panel topic-block">
           <h2>1. Responsabilites du DBA</h2>
           <ul class="bullet-list">
-            <li>Assurer la disponibilite de la base quand les utilisateurs en ont besoin.</li>
-            <li>Anticiper les pannes et eviter les causes courantes de dysfonctionnement.</li>
-            <li>Augmenter le <span class="mono">MTBF</span> pour espacer les incidents.</li>
-            <li>Reduire le <span class="mono">MTTR</span> en preparant les procedures de reprise et les sauvegardes.</li>
-            <li>Minimiser la perte de donnees, idealement sans perdre de transaction validee.</li>
+            <li><strong>MTBF</strong> (Mean Time Between Failures) — temps moyen entre deux pannes. Plus il est eleve, plus le systeme est fiable. Le DBA doit l'augmenter.</li>
+            <li><strong>MTTR</strong> (Mean Time To Recover) — temps moyen de recuperation. Plus il est faible, plus la reprise est rapide. Le DBA doit le reduire.</li>
+            <li>Garantir la disponibilite de la base quand les utilisateurs en ont besoin.</li>
+            <li>Anticiper les pannes et preparer les procedures de reprise.</li>
+            <li>Minimiser la perte de donnees, idealement zero transaction validee perdue.</li>
           </ul>
         </article>
-
         <aside class="panel">
-          <h2>Traduction simple</h2>
+          <h2>Formule a retenir</h2>
           <div class="quote-box">
-            Le DBA ne doit pas seulement sauver la base apres une panne. Il doit organiser l’environnement
-            pour que la panne soit plus rare, moins grave et plus rapide a corriger.
+            MTBF eleve = pannes rares.<br>
+            MTTR faible = reprise rapide.<br>
+            L'objectif du DBA: les deux en meme temps.
           </div>
         </aside>
       </div>
@@ -74,44 +73,14 @@
           <h2>2. Categories de pannes</h2>
           <div class="table-wrap">
             <table>
-              <thead>
-                <tr>
-                  <th>Type de panne</th>
-                  <th>Exemple</th>
-                  <th>Idee de reponse</th>
-                </tr>
-              </thead>
+              <thead><tr><th>Type de panne</th><th>Exemple</th><th>Solution</th></tr></thead>
               <tbody>
-                <tr>
-                  <td>Echec d’une instruction</td>
-                  <td>Insertion invalide, manque de privileges, probleme d’espace</td>
-                  <td>Corriger les donnees, accorder les droits adequats, ajuster l’espace</td>
-                </tr>
-                <tr>
-                  <td>Echec d’un processus utilisateur</td>
-                  <td>Session interrompue anormalement</td>
-                  <td>PMON nettoie les transactions non validees et libere les ressources</td>
-                </tr>
-                <tr>
-                  <td>Panne reseau</td>
-                  <td>Perte de connexion, listener indisponible</td>
-                  <td>Redondance reseau, listener de secours, diagnostic</td>
-                </tr>
-                <tr>
-                  <td>Erreur utilisateur</td>
-                  <td>Suppression ou modification involontaire</td>
-                  <td>Rollback, flashback, corbeille selon le cas</td>
-                </tr>
-                <tr>
-                  <td>Panne d’instance</td>
-                  <td>Coupure de courant, crash d’un processus de fond</td>
-                  <td>Redemarrage puis recuperation automatique</td>
-                </tr>
-                <tr>
-                  <td>Panne physique</td>
-                  <td>Disque HS, fichier supprime ou corrompu</td>
-                  <td>Restaurer puis recuperer les fichiers concernes</td>
-                </tr>
+                <tr><td>Echec d'instruction</td><td>INSERT invalide, manque de privileges, espace insuffisant</td><td>Corriger la requete, accorder les droits, ajuster les quotas</td></tr>
+                <tr><td>Echec processus utilisateur</td><td>Session interrompue brutalement</td><td>PMON nettoie automatiquement les transactions non validees et libere les ressources</td></tr>
+                <tr><td>Panne reseau</td><td>Listener indisponible, coupure reseau</td><td>Redondance reseau, listener de secours, diagnostic</td></tr>
+                <tr><td>Erreur utilisateur</td><td>Suppression ou modification accidentelle</td><td>Rollback, Flashback Table, Flashback Drop, PITR selon le cas</td></tr>
+                <tr><td>Panne d'instance</td><td>Coupure de courant, crash d'un processus de fond</td><td>Redemarrage + recuperation automatique d'instance</td></tr>
+                <tr><td>Panne physique</td><td>Disque HS, datafile corrompu ou supprime</td><td>Restaurer le fichier depuis une sauvegarde, puis recuperer</td></tr>
               </tbody>
             </table>
           </div>
@@ -122,27 +91,29 @@
     <section class="section" id="restore-recover">
       <div class="page-shell columns">
         <article class="panel topic-block">
-          <h2>3. Restauration vs recuperation</h2>
-          <p>
-            Le chapitre demande de ne jamais confondre ces deux operations. Elles sont liees,
-            mais elles ne font pas la meme chose.
-          </p>
-          <ul class="bullet-list">
-            <li><strong>Restauration</strong>: recopier un fichier de sauvegarde pour qu’Oracle puisse de nouveau l’utiliser.</li>
-            <li><strong>Recuperation</strong>: appliquer redo et autres informations de journalisation afin de remettre le fichier dans l’etat voulu.</li>
-          </ul>
+          <h2>3. Restauration vs Recuperation</h2>
           <div class="callout danger">
-            En pratique, la recuperation intervient souvent apres la restauration. La restauration remet le support,
-            la recuperation remet le contenu a jour.
+            Ne jamais confondre ces deux operations. Elles sont complementaires mais distinctes.
+          </div>
+          <ul class="bullet-list" style="margin-top:14px">
+            <li><strong>RESTORE (restauration)</strong> — recopier un fichier de sauvegarde a son emplacement. Oracle peut de nouveau le lire, mais il n'est pas forcement a jour.</li>
+            <li><strong>RECOVER (recuperation)</strong> — appliquer les redo logs et archives pour remettre le fichier restaure dans un etat coherent et a jour.</li>
+          </ul>
+          <div class="callout" style="margin-top:14px">
+            La recuperation suit toujours la restauration. Restaurer remet le support; recuperer remet le contenu a jour.
           </div>
         </article>
-
         <aside class="panel">
           <h2>Portee de la recuperation</h2>
-          <ul class="check-list">
-            <li>Complete: on vise l’etat le plus recent possible.</li>
-            <li>Incomplete: on s’arrete a un point dans le temps, un SCN ou un instant donne.</li>
-          </ul>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Type</th><th>Definition</th><th>Commande finale</th></tr></thead>
+              <tbody>
+                <tr><td>Complete</td><td>Revenir a l'etat le plus recent possible (toutes les transactions validees).</td><td><span class="mono">ALTER DATABASE OPEN;</span></td></tr>
+                <tr><td>Incomplete (PITR)</td><td>Revenir a un point precis: heure, SCN ou sequence.</td><td><span class="mono">ALTER DATABASE OPEN RESETLOGS;</span></td></tr>
+              </tbody>
+            </table>
+          </div>
         </aside>
       </div>
     </section>
@@ -150,85 +121,153 @@
     <section class="section" id="instance">
       <div class="page-shell">
         <article class="panel topic-block">
-          <h2>4. Recuperation automatique de l’instance</h2>
-          <p>
-            Si l’instance s’arrete brutalement alors que les datafiles ne sont pas synchronises,
-            Oracle lance au redemarrage une recuperation automatique d’instance.
-          </p>
-          <ul class="bullet-list">
-            <li>Les redo logs servent a reappliquer les modifications necessaires.</li>
-            <li>L’undo sert a annuler les transactions non validees.</li>
-            <li>Cette reprise est normale et constitue un mecanisme central de resilience Oracle.</li>
-          </ul>
+          <h2>4. Recuperation automatique de l'instance</h2>
+          <p>Si l'instance s'arrete brutalement (panne courant, crash processus), les datafiles ne sont pas synchronises avec les redo logs. Au redemarrage, Oracle lance une recuperation automatique en deux phases:</p>
+          <div class="table-wrap" style="margin-top:14px">
+            <table>
+              <thead><tr><th>Phase</th><th>Nom</th><th>Action</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td><strong>Roll-forward</strong></td><td>Oracle rejoue toutes les modifications enregistrees dans les redo logs (validees ou non).</td></tr>
+                <tr><td>2</td><td><strong>Rollback</strong></td><td>Oracle annule les transactions non validees en utilisant les segments Undo.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout" style="margin-top:14px">
+            Cette reprise est automatique et transparente. L'administrateur n'a rien a faire. La base s'ouvre proprement apres les deux phases.
+          </div>
         </article>
       </div>
     </section>
 
-    <section class="section" id="config">
+    <section class="section" id="archivelog">
       <div class="page-shell">
         <article class="panel topic-block">
-          <div class="study-label">Point fort</div>
-          <h2>5. Configuration de la sauvegarde et de la recuperation</h2>
-          <ul class="bullet-list">
-            <li>Planifier des sauvegardes regulieres.</li>
-            <li>Multiplexer les fichiers de controle.</li>
-            <li>Multiplexer les groupes de redo.</li>
-            <li>Configurer une Fast Recovery Area.</li>
-            <li>Choisir et comprendre le mode d’archivage.</li>
-          </ul>
+          <h2>5. Mode ARCHIVELOG</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Mode</th><th>Comportement</th><th>Recuperation possible</th></tr></thead>
+              <tbody>
+                <tr><td><span class="mono">NOARCHIVELOG</span></td><td>Les redo logs sont reutilises sans etre archives. Historique perdu.</td><td>Limitee: uniquement recuperation d'instance. Pas de recuperation complete apres panne physique.</td></tr>
+                <tr><td><span class="mono">ARCHIVELOG</span></td><td>Les redo logs sont archives avant reutilisation. Historique complet conserve.</td><td>Complete: recuperation jusqu'au dernier commit, sauvegarde a chaud possible.</td></tr>
+              </tbody>
+            </table>
+          </div>
 
-          <h3>Fast Recovery Area</h3>
-          <p>
-            La FRA est une zone de stockage reservee a la recuperation rapide. Elle centralise plusieurs
-            fichiers utiles a la reprise: pieces de sauvegarde, copies, archived redo logs, control file autobackups
-            et autres fichiers lies au recovery.
-          </p>
+          <span class="code-label">Verifier le mode actuel</span>
+          <pre class="code-block"><code>ARCHIVE LOG LIST;
 
-          <h3>Modes d’archivage</h3>
-          <p>
-            Le principe a retenir est que le mode archive permet de conserver l’historique des redo archives,
-            ce qui augmente fortement les possibilites de recuperation par rapport a un mode sans archivage.
-          </p>
+SELECT log_mode FROM v$database;</code></pre>
+
+          <span class="code-label">Activer le mode ARCHIVELOG</span>
+          <pre class="code-block"><code>SHUTDOWN IMMEDIATE;
+STARTUP MOUNT;
+ALTER DATABASE ARCHIVELOG;
+ALTER DATABASE OPEN;</code></pre>
+
+          <span class="code-label">Desactiver le mode ARCHIVELOG</span>
+          <pre class="code-block"><code>SHUTDOWN IMMEDIATE;
+STARTUP MOUNT;
+ALTER DATABASE NOARCHIVELOG;
+ALTER DATABASE OPEN;</code></pre>
+
+          <div class="callout danger">
+            <strong>Exam:</strong> La sequence en 4 etapes est obligatoire. La base doit etre en mode MOUNT (pas OPEN) pour changer le mode d'archivage.
+          </div>
         </article>
+      </div>
+    </section>
 
-        <div class="panel">
-          <h2>Resume flash</h2>
-          <p>
-            Ce chapitre pose le socle de tout le reste: avant RMAN, il faut comprendre quels fichiers comptent,
-            ce qu’est une panne, et pourquoi restaurer ne suffit pas toujours sans recuperer.
-          </p>
+    <section class="section" id="fra">
+      <div class="page-shell">
+        <article class="panel topic-block">
+          <h2>6. Fast Recovery Area (FRA)</h2>
+          <p>Zone de stockage Oracle reservee aux fichiers de recuperation. Elle centralise: pieces de sauvegarde, copies, archived redo logs, control file autobackups, flashback logs.</p>
+
+          <h3>Parametres de configuration</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Parametre</th><th>Role</th></tr></thead>
+              <tbody>
+                <tr><td><span class="mono">DB_RECOVERY_FILE_DEST</span></td><td>Chemin du repertoire FRA.</td></tr>
+                <tr><td><span class="mono">DB_RECOVERY_FILE_DEST_SIZE</span></td><td>Taille maximale allouee a la FRA.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <span class="code-label">Configurer la FRA</span>
+          <pre class="code-block"><code>ALTER SYSTEM SET db_recovery_file_dest = '/u01/app/oracle/fra';
+ALTER SYSTEM SET db_recovery_file_dest_size = 20G;</code></pre>
+
+          <span class="code-label">Verifier l'utilisation de la FRA</span>
+          <pre class="code-block"><code>-- Taille et espace utilise
+SELECT name, space_limit, space_used, space_reclaimable, number_of_files
+  FROM v$recovery_file_dest;
+
+-- Utilisation par type de fichier
+SELECT file_type, percent_space_used, percent_space_reclaimable, number_of_files
+  FROM v$recovery_area_usage;</code></pre>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="fichiers">
+      <div class="page-shell">
+        <article class="panel topic-block">
+          <h2>7. Fichiers critiques — Control files et Redo logs</h2>
+
+          <h3>Control files</h3>
+          <p>Contiennent les metadonnees de la base: structure, datafiles, redo logs, checkpoints. Oracle recommande de les multiplexer (plusieurs copies sur disques differents).</p>
+
+          <span class="code-label">Gestion des control files</span>
+          <pre class="code-block"><code>-- Voir la liste des control files
+SHOW PARAMETER control_files;
+
+SELECT name FROM v$controlfile;</code></pre>
+
+          <h3>Redo logs</h3>
+          <p>Enregistrent toutes les modifications. Utilises pour la recuperation. Doivent etre multiplexes (plusieurs membres par groupe sur disques differents).</p>
+
+          <span class="code-label">Gestion des redo logs</span>
+          <pre class="code-block"><code>-- Voir les groupes de redo logs
+SELECT group#, sequence#, status, members, bytes
+  FROM v$log;
+
+-- Voir les membres de chaque groupe
+SELECT group#, member, status
+  FROM v$logfile
+  ORDER BY group#;
+
+-- Ajouter un membre a un groupe existant (multiplexage)
+ALTER DATABASE ADD LOGFILE MEMBER '/u02/oradata/redo01b.log' TO GROUP 1;
+
+-- Ajouter un nouveau groupe
+ALTER DATABASE ADD LOGFILE GROUP 4 ('/u01/oradata/redo04.log') SIZE 200M;</code></pre>
+
+          <h3>Commandes generales de recuperation</h3>
+          <span class="code-label">Sequence de recuperation complete</span>
+          <pre class="code-block"><code>STARTUP;
+STARTUP MOUNT;
+SHUTDOWN IMMEDIATE;
+
+RESTORE DATABASE;
+RECOVER DATABASE;
+
+RESTORE TABLESPACE nom_tablespace;
+RECOVER TABLESPACE nom_tablespace;
+
+RESTORE DATAFILE numero_datafile;
+RECOVER DATAFILE numero_datafile;
+
+-- Ouvrir apres recuperation complete
+ALTER DATABASE OPEN;
+
+-- Ouvrir apres recuperation incomplete (nouvelle incarnation)
+ALTER DATABASE OPEN RESETLOGS;</code></pre>
+
           <div class="button-row">
-            <a class="button-link secondary" href="tp-backup-recovery.html">Voir le resume TP associe</a>
-            <a class="button-link" href="exercices-types.html#backup">Voir les exercices types</a>
-            <a class="button-link ghost" href="examens-similaires.html#backup">Voir les examens similaires</a>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" id="commandes">
-      <div class="page-shell">
-        <article class="panel topic-block">
-          <div class="study-label">Revision syntaxe</div>
-          <h2>6. Commandes du cours a memoriser</h2>
-          <div class="command-grid">
-            <div class="command-card">
-              <h3>Configuration de la FRA</h3>
-              <p>Ces syntaxes apparaissent dans la partie Fast Recovery Area du cours.</p>
-              <pre class="syntax-block">SQL&gt; ALTER SYSTEM SET db_recovery_file_dest = directory | disk group;
-SQL&gt; ALTER SYSTEM SET db_recovery_file_dest_size = integer [K|M|G];</pre>
-            </div>
-            <div class="command-card">
-              <h3>Vues a consulter</h3>
-              <p>Le support cite ces deux vues comme vues de controle de la zone de recovery.</p>
-              <pre class="syntax-block">SELECT * FROM V$RECOVERY_FILE_DEST;
-SELECT * FROM V$RECOVERY_AREA_USAGE;</pre>
-            </div>
-          </div>
-
-          <div class="revision-banner">
-            <strong>Point fort revision:</strong>
-            ce chapitre contient peu de commandes, mais elles sont tres tombables a l'ecrit parce qu'elles sont simples et directement liees a la FRA.
+            <a class="button-link secondary" href="tp-backup-recovery.html">Resume TP</a>
+            <a class="button-link" href="exercices-types.html#backup">Exercices types</a>
+            <a class="button-link ghost" href="examens-similaires.html#backup">Examens similaires</a>
           </div>
         </article>
       </div>
@@ -237,7 +276,7 @@ SELECT * FROM V$RECOVERY_AREA_USAGE;</pre>
 
   <footer class="footer">
     <div class="page-shell">
-      <div class="footer-card">Page theorique basee sur le cours de sauvegarde et recuperation, sans melange avec les TP.</div>
+      <div class="footer-card">Chapitre 2 — Resume complet avec toutes les commandes du cours.</div>
     </div>
   </footer>
 </body>
