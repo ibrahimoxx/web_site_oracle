@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TP Resume - Backup recovery et FRA</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-mark">TP backup</span>
+        <span class="brand-title">Control file et Fast Recovery Area</span>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html">Accueil</a>
+        <a href="chapitre-backup-recovery.html">Resume cours</a>
+        <a href="exercices-types.html#backup">Exercices types</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-header">
+      <div class="page-shell">
+        <div class="page-header-card">
+          <span class="eyebrow">TP seulement</span>
+          <h1>Resume TP sauvegarde et recuperation</h1>
+          <p>
+            Cette page rassemble les manipulations pratiques sur le multiplexage du control file et la configuration
+            de la Fast Recovery Area.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="page-shell grid grid-2">
+        <article class="panel topic-block">
+          <h2>1. Multiplexage du control file</h2>
+          <ul class="bullet-list">
+            <li>Verifier combien de control files existent deja.</li>
+            <li>Consulter le parametre <span class="mono">CONTROL_FILES</span>.</li>
+            <li>Creer un PFILE a partir du SPFILE.</li>
+            <li>Arreter la base, copier un control file, modifier le PFILE, puis recreer le SPFILE.</li>
+            <li>Redemarrer et reverifier la vue <span class="mono">V$CONTROLFILE</span>.</li>
+          </ul>
+        </article>
+
+        <article class="panel topic-block">
+          <h2>2. Fast Recovery Area</h2>
+          <ul class="bullet-list">
+            <li>Verifier <span class="mono">DB_RECOVERY_FILE_DEST</span> et <span class="mono">DB_RECOVERY_FILE_DEST_SIZE</span>.</li>
+            <li>Consulter <span class="mono">V$RECOVERY_FILE_DEST</span> et <span class="mono">V$RECOVERY_AREA_USAGE</span>.</li>
+            <li>Modifier la taille de la FRA.</li>
+            <li>Comprendre que la taille est un parametre dynamique.</li>
+          </ul>
+        </article>
+      </div>
+
+      <div class="page-shell">
+        <div class="panel">
+          <h2>Ce que le TP t’apprend vraiment</h2>
+          <p>
+            Que la recuperabilite se prepare au niveau des fichiers critiques et de l’espace reserve au recovery,
+            pas seulement au niveau des commandes RMAN.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

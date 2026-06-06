@@ -1,0 +1,7 @@
+*.pptx
+*.docx
+~$*
+
+# Optional local clutter
+Thumbs.db
+Desktop.ini

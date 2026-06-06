@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TP Resume - Sauvegardes RMAN</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-mark">TP sauvegardes</span>
+        <span class="brand-title">Sauvegardes RMAN</span>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html">Accueil</a>
+        <a href="chapitre-sauvegardes-rman.html">Resume cours</a>
+        <a href="exercices-types.html#backup-rman">Exercices types</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-header">
+      <div class="page-shell">
+        <div class="page-header-card">
+          <span class="eyebrow">TP seulement</span>
+          <h1>Resume TP sauvegardes avec RMAN</h1>
+          <p>
+            Cette page condense les commandes pratiques du TP: sauvegarde de base complete,
+            PDB, tablespace, backupset, image copy, retention et incremental.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="page-shell grid grid-2">
+        <article class="panel topic-block">
+          <h2>1. Sauvegardes de base</h2>
+          <ul class="bullet-list">
+            <li><span class="mono">REPORT SCHEMA</span> pour voir la structure.</li>
+            <li>Backup de la base complete.</li>
+            <li>Backup avec archived redo logs.</li>
+            <li>Backup d’une PDB.</li>
+            <li>Backup d’un tablespace d’une PDB.</li>
+          </ul>
+        </article>
+
+        <article class="panel topic-block">
+          <h2>2. Formes de backup</h2>
+          <ul class="bullet-list">
+            <li><span class="mono">BACKUP AS BACKUPSET</span> pour le format backup set.</li>
+            <li><span class="mono">BACKUP AS COPY DATAFILE</span> pour une image copy.</li>
+            <li>Backup d’archivelog en copie selon un motif.</li>
+          </ul>
+        </article>
+
+        <article class="panel topic-block">
+          <h2>3. Control file et spfile</h2>
+          <ul class="bullet-list">
+            <li>Verifier si <span class="mono">CONTROLFILE AUTOBACKUP</span> est active.</li>
+            <li>L’activer si besoin pour proteger la structure de la base.</li>
+          </ul>
+        </article>
+
+        <article class="panel topic-block">
+          <h2>4. Incremental</h2>
+          <ul class="bullet-list">
+            <li>Activer le block change tracking.</li>
+            <li>Realiser un incremental level 1 apres une base de niveau 0.</li>
+            <li>Executer un recover a partir du tag de copie si le scenario le demande.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

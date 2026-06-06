@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapitre 2 - Sauvegarde et recuperation</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-mark">Chapitre 2</span>
+        <span class="brand-title">Backup &amp; Recovery</span>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html">Accueil</a>
+        <a href="tp-backup-recovery.html">Resume TP</a>
+        <a href="exercices-types.html#backup">Exercices types</a>
+        <a href="examens-similaires.html#backup">Examens similaires</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-header">
+      <div class="page-shell">
+        <div class="page-header-card">
+          <span class="eyebrow">Cours seulement</span>
+          <h1>Sauvegarde et recuperation</h1>
+          <p>
+            Ce chapitre installe le vocabulaire central du module: types de pannes, restauration,
+            recuperation, recuperation automatique de l’instance, recuperation complete ou incomplete,
+            et configuration de base pour proteger la base.
+          </p>
+          <div class="page-anchor-nav">
+            <a href="#dba">Role du DBA</a>
+            <a href="#pannes">Pannes</a>
+            <a href="#restore-recover">Restore vs recover</a>
+            <a href="#instance">Instance recovery</a>
+            <a href="#config">Configuration</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="dba">
+      <div class="page-shell columns">
+        <article class="panel topic-block">
+          <h2>1. Responsabilites du DBA</h2>
+          <ul class="bullet-list">
+            <li>Assurer la disponibilite de la base quand les utilisateurs en ont besoin.</li>
+            <li>Anticiper les pannes et eviter les causes courantes de dysfonctionnement.</li>
+            <li>Augmenter le <span class="mono">MTBF</span> pour espacer les incidents.</li>
+            <li>Reduire le <span class="mono">MTTR</span> en preparant les procedures de reprise et les sauvegardes.</li>
+            <li>Minimiser la perte de donnees, idealement sans perdre de transaction validee.</li>
+          </ul>
+        </article>
+
+        <aside class="panel">
+          <h2>Traduction simple</h2>
+          <div class="quote-box">
+            Le DBA ne doit pas seulement sauver la base apres une panne. Il doit organiser l’environnement
+            pour que la panne soit plus rare, moins grave et plus rapide a corriger.
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section" id="pannes">
+      <div class="page-shell">
+        <article class="panel topic-block">
+          <h2>2. Categories de pannes</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Type de panne</th>
+                  <th>Exemple</th>
+                  <th>Idee de reponse</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Echec d’une instruction</td>
+                  <td>Insertion invalide, manque de privileges, probleme d’espace</td>
+                  <td>Corriger les donnees, accorder les droits adequats, ajuster l’espace</td>
+                </tr>
+                <tr>
+                  <td>Echec d’un processus utilisateur</td>
+                  <td>Session interrompue anormalement</td>
+                  <td>PMON nettoie les transactions non validees et libere les ressources</td>
+                </tr>
+                <tr>
+                  <td>Panne reseau</td>
+                  <td>Perte de connexion, listener indisponible</td>
+                  <td>Redondance reseau, listener de secours, diagnostic</td>
+                </tr>
+                <tr>
+                  <td>Erreur utilisateur</td>
+                  <td>Suppression ou modification involontaire</td>
+                  <td>Rollback, flashback, corbeille selon le cas</td>
+                </tr>
+                <tr>
+                  <td>Panne d’instance</td>
+                  <td>Coupure de courant, crash d’un processus de fond</td>
+                  <td>Redemarrage puis recuperation automatique</td>
+                </tr>
+                <tr>
+                  <td>Panne physique</td>
+                  <td>Disque HS, fichier supprime ou corrompu</td>
+                  <td>Restaurer puis recuperer les fichiers concernes</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="restore-recover">
+      <div class="page-shell columns">
+        <article class="panel topic-block">
+          <h2>3. Restauration vs recuperation</h2>
+          <p>
+            Le chapitre demande de ne jamais confondre ces deux operations. Elles sont liees,
+            mais elles ne font pas la meme chose.
+          </p>
+          <ul class="bullet-list">
+            <li><strong>Restauration</strong>: recopier un fichier de sauvegarde pour qu’Oracle puisse de nouveau l’utiliser.</li>
+            <li><strong>Recuperation</strong>: appliquer redo et autres informations de journalisation afin de remettre le fichier dans l’etat voulu.</li>
+          </ul>
+          <div class="callout danger">
+            En pratique, la recuperation intervient souvent apres la restauration. La restauration remet le support,
+            la recuperation remet le contenu a jour.
+          </div>
+        </article>
+
+        <aside class="panel">
+          <h2>Portee de la recuperation</h2>
+          <ul class="check-list">
+            <li>Complete: on vise l’etat le plus recent possible.</li>
+            <li>Incomplete: on s’arrete a un point dans le temps, un SCN ou un instant donne.</li>
+          </ul>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section" id="instance">
+      <div class="page-shell">
+        <article class="panel topic-block">
+          <h2>4. Recuperation automatique de l’instance</h2>
+          <p>
+            Si l’instance s’arrete brutalement alors que les datafiles ne sont pas synchronises,
+            Oracle lance au redemarrage une recuperation automatique d’instance.
+          </p>
+          <ul class="bullet-list">
+            <li>Les redo logs servent a reappliquer les modifications necessaires.</li>
+            <li>L’undo sert a annuler les transactions non validees.</li>
+            <li>Cette reprise est normale et constitue un mecanisme central de resilience Oracle.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="config">
+      <div class="page-shell">
+        <article class="panel topic-block">
+          <h2>5. Configuration de la sauvegarde et de la recuperation</h2>
+          <ul class="bullet-list">
+            <li>Planifier des sauvegardes regulieres.</li>
+            <li>Multiplexer les fichiers de controle.</li>
+            <li>Multiplexer les groupes de redo.</li>
+            <li>Configurer une Fast Recovery Area.</li>
+            <li>Choisir et comprendre le mode d’archivage.</li>
+          </ul>
+
+          <h3>Fast Recovery Area</h3>
+          <p>
+            La FRA est une zone de stockage reservee a la recuperation rapide. Elle centralise plusieurs
+            fichiers utiles a la reprise: pieces de sauvegarde, copies, archived redo logs, control file autobackups
+            et autres fichiers lies au recovery.
+          </p>
+
+          <h3>Modes d’archivage</h3>
+          <p>
+            Le principe a retenir est que le mode archive permet de conserver l’historique des redo archives,
+            ce qui augmente fortement les possibilites de recuperation par rapport a un mode sans archivage.
+          </p>
+        </article>
+
+        <div class="panel">
+          <h2>Resume flash</h2>
+          <p>
+            Ce chapitre pose le socle de tout le reste: avant RMAN, il faut comprendre quels fichiers comptent,
+            ce qu’est une panne, et pourquoi restaurer ne suffit pas toujours sans recuperer.
+          </p>
+          <div class="button-row">
+            <a class="button-link secondary" href="tp-backup-recovery.html">Voir le resume TP associe</a>
+            <a class="button-link" href="exercices-types.html#backup">Voir les exercices types</a>
+            <a class="button-link ghost" href="examens-similaires.html#backup">Voir les examens similaires</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="page-shell">
+      <div class="footer-card">Page theorique basee sur le cours de sauvegarde et recuperation, sans melange avec les TP.</div>
+    </div>
+  </footer>
+</body>
+</html>

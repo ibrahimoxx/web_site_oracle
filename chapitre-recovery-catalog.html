@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recovery Catalog - Resume chapitre</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-mark">Partie 4</span>
+        <span class="brand-title">Recovery Catalog</span>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html">Accueil</a>
+        <a href="exercices-types.html#catalog">Exercices types</a>
+        <a href="examens-similaires.html#catalog">Examens similaires</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-header">
+      <div class="page-shell">
+        <div class="page-header-card">
+          <span class="eyebrow">Cours seulement</span>
+          <h1>Recovery Catalog RMAN</h1>
+          <p>
+            Cette partie du cours explique quand RMAN peut se contenter du control file et quand il devient
+            preferable d’ajouter un catalogue de recuperation externe.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="page-shell grid grid-2">
+        <article class="panel topic-block">
+          <h2>1. Definition</h2>
+          <p>
+            Le recovery catalog est une base de donnees distincte dans laquelle RMAN stocke des metadonnees
+            sur les sauvegardes et les restaurations.
+          </p>
+          <ul class="bullet-list">
+            <li>Il n’est pas obligatoire pour que RMAN fonctionne.</li>
+            <li>Sans lui, RMAN peut utiliser le control file de la base cible.</li>
+            <li>Avec lui, on gagne en richesse d’historique et en flexibilite d’administration.</li>
+          </ul>
+        </article>
+
+        <article class="panel topic-block">
+          <h2>2. Interet principal</h2>
+          <ul class="bullet-list">
+            <li>Conserver l’historique des sauvegardes plus largement.</li>
+            <li>Stocker et reutiliser des scripts RMAN.</li>
+            <li>Produire des rapports personnalises.</li>
+            <li>Gerer plusieurs bases cibles depuis un meme referentiel.</li>
+            <li>Supporter des options comme <span class="mono">KEEP FOREVER</span>.</li>
+          </ul>
+        </article>
+
+        <article class="panel topic-block">
+          <h2>3. Control file vs Recovery Catalog</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Mode</th>
+                  <th>Forces</th>
+                  <th>Limites</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Control file</td>
+                  <td>Simple, direct, administration plus legere</td>
+                  <td>Historique et services plus limites</td>
+                </tr>
+                <tr>
+                  <td>Recovery Catalog</td>
+                  <td>Historisation, scripts stockes, multi-cibles, rapports</td>
+                  <td>Necessite une base distincte et plus d’administration</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="panel topic-block">
+          <h2>4. Creation logique</h2>
+          <ol class="bullet-list">
+            <li>Preparer la base qui accueillera le catalogue.</li>
+            <li>Creer le proprietaire du catalogue avec le privilege <span class="mono">RECOVERY_CATALOG_OWNER</span>.</li>
+            <li>Creer ensuite le catalogue lui-meme.</li>
+          </ol>
+          <p class="muted">
+            Le cours souligne qu’il faut aussi dimensionner l’espace selon le nombre de bases et de sauvegardes suivies.
+          </p>
+        </article>
+      </div>
+
+      <div class="page-shell">
+        <div class="panel">
+          <h2>Resume flash</h2>
+          <p>
+            Retenir surtout ceci: le recovery catalog n’est pas une sauvegarde de la base applicative.
+            C’est un depot de metadonnees RMAN, utile pour mieux piloter, historiser et mutualiser les operations.
+          </p>
+          <div class="button-row">
+            <a class="button-link" href="exercices-types.html#catalog">Voir les exercices types</a>
+            <a class="button-link ghost" href="examens-similaires.html#catalog">Voir les examens similaires</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="page-shell">
+      <div class="footer-card">Partie theorique du recovery catalog, sans integration de TP.</div>
+    </div>
+  </footer>
+</body>
+</html>

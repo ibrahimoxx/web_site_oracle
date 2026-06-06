@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restauration et recuperation RMAN - Resume chapitre</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-mark">Partie 6</span>
+        <span class="brand-title">Restauration &amp; recovery RMAN</span>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html">Accueil</a>
+        <a href="tp-restauration-rman.html">Resume TP</a>
+        <a href="exercices-types.html#recovery-rman">Exercices types</a>
+        <a href="examens-similaires.html#recovery-rman">Examens similaires</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-header">
+      <div class="page-shell">
+        <div class="page-header-card">
+          <span class="eyebrow">Cours seulement</span>
+          <h1>Restauration et recuperation avec RMAN</h1>
+          <p>
+            Cette partie montre comment RMAN est utilise quand la panne est deja la:
+            fichiers critiques perdus, recuperation complete ou incomplete, control file de sauvegarde
+            et spfile a restaurer.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="page-shell grid grid-2">
+        <article class="panel topic-block">
+          <h2>1. Principe general</h2>
+          <ul class="bullet-list">
+            <li><span class="mono">RESTORE</span> remet en place les fichiers depuis la sauvegarde.</li>
+            <li><span class="mono">RECOVER</span> applique les modifications necessaires via redo ou archives.</li>
+            <li>Le couple restore + recover constitue la logique de reprise complete.</li>
+          </ul>
+        </article>
+
+        <article class="panel topic-block">
+          <h2>2. Recuperation complete</h2>
+          <p>
+            L’objectif est de revenir a l’etat le plus a jour possible de la base
+            en appliquant toutes les modifications valides disponibles.
+          </p>
+          <ul class="bullet-list">
+            <li>Souvent utilise apres perte d’un datafile critique.</li>
+            <li>Peut necessiter un montage de la base avant la reprise.</li>
+          </ul>
+        </article>
+
+        <article class="panel topic-block">
+          <h2>3. Recuperation incomplete</h2>
+          <p>
+            On vise un point precis dans le temps, un SCN ou un moment donne. Elle sert quand on ne veut
+            pas rejouer toutes les modifications ou quand certaines sont perdues ou inde desirables.
+          </p>
+          <ul class="bullet-list">
+            <li>Elle est pilotee par un critere d’arret (<span class="mono">UNTIL TIME</span>, <span class="mono">UNTIL SCN</span>, etc.).</li>
+            <li>L’ouverture de la base apres une telle reprise impose souvent <span class="mono">RESETLOGS</span>.</li>
+          </ul>
+        </article>
+
+        <article class="panel topic-block">
+          <h2>4. Cas cites par le cours</h2>
+          <ul class="bullet-list">
+            <li>Perte d’un fichier de donnees critique.</li>
+            <li>Recuperation a partir d’un fichier de controle de sauvegarde.</li>
+            <li>Restauration du spfile depuis une sauvegarde automatique.</li>
+          </ul>
+        </article>
+
+        <article class="panel topic-block">
+          <h2>5. Control file de sauvegarde</h2>
+          <p>
+            Si le control file restaure n’est pas a jour, il faut resynchroniser la base via une recuperation,
+            puis ouvrir souvent avec <span class="mono">RESETLOGS</span>. Cela cree une nouvelle incarnation logique.
+          </p>
+        </article>
+
+        <article class="panel topic-block">
+          <h2>6. Spfile</h2>
+          <p>
+            Le cours montre que RMAN peut aider a restaurer le spfile, meme dans un contexte ou l’instance
+            ne demarre pas normalement, en s’appuyant sur des sauvegardes automatiques et parfois sur le DBID.
+          </p>
+        </article>
+      </div>
+
+      <div class="page-shell">
+        <div class="panel">
+          <h2>Resume flash</h2>
+          <p>
+            L’idee centrale est la suivante: en recovery, RMAN doit retrouver les bons fichiers, les restaurer,
+            les remettre a jour, puis rouvrir la base de maniere coherente. L’examen aime surtout les differences
+            complete/incomplete et le role de <span class="mono">RESETLOGS</span>.
+          </p>
+          <div class="button-row">
+            <a class="button-link secondary" href="tp-restauration-rman.html">Voir le resume TP associe</a>
+            <a class="button-link" href="exercices-types.html#recovery-rman">Voir les exercices types</a>
+            <a class="button-link ghost" href="examens-similaires.html#recovery-rman">Voir les examens similaires</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="page-shell">
+      <div class="footer-card">Page theorique de recovery RMAN, sans reutiliser le detail du TP.</div>
+    </div>
+  </footer>
+</body>
+</html>

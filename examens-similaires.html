@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Examens similaires corriges - Oracle DBA2</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-mark">Simulation</span>
+        <span class="brand-title">Examens similaires avec resultats</span>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html">Accueil</a>
+        <a href="exercices-types.html">Exercices types</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-header">
+      <div class="page-shell">
+        <div class="page-header-card">
+          <span class="eyebrow">Mode revision finale</span>
+          <h1>Deux mini examens similaires corriges</h1>
+          <p>
+            Ces sujets sont construits dans le meme esprit que le module: definitions, comparaisons,
+            interet des mecanismes Oracle et reconnaissance des commandes ou options importantes.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="utilisateurs">
+      <div class="page-shell grid grid-2">
+        <article class="exercise-card">
+          <h3>Examen similaire A</h3>
+          <ul class="bullet-list">
+            <li><strong>Q1.</strong> Citer deux privileges systeme et expliquer leur utilite.<br><strong>Resultat:</strong> Exemple <span class="mono">CREATE SESSION</span> pour se connecter, <span class="mono">CREATE TABLE</span> pour creer des tables.</li>
+            <li><strong>Q2.</strong> A quoi sert un role ?<br><strong>Resultat:</strong> A factoriser plusieurs privileges sous un nom unique pour simplifier l’administration.</li>
+            <li><strong>Q3.</strong> Donner deux parametres de profil lies au mot de passe.<br><strong>Resultat:</strong> <span class="mono">FAILED_LOGIN_ATTEMPTS</span>, <span class="mono">PASSWORD_LIFE_TIME</span>.</li>
+            <li><strong>Q4.</strong> Difference entre authentification base et OS ?<br><strong>Resultat:</strong> Dans le premier cas Oracle verifie le mot de passe; dans le second, Oracle s’appuie sur le systeme d’exploitation.</li>
+          </ul>
+        </article>
+
+        <article class="exercise-card" id="backup">
+          <h3>Examen similaire B</h3>
+          <ul class="bullet-list">
+            <li><strong>Q1.</strong> Difference entre restauration et recuperation.<br><strong>Resultat:</strong> Restauration = recopier un backup; recuperation = reappliquer les modifications necessaires.</li>
+            <li><strong>Q2.</strong> Citer trois categories de panne.<br><strong>Resultat:</strong> Panne d’instance, panne physique, erreur utilisateur.</li>
+            <li><strong>Q3.</strong> Utilite de la FRA.<br><strong>Resultat:</strong> Zone reservee aux fichiers utiles au recovery et a la gestion des sauvegardes.</li>
+            <li><strong>Q4.</strong> Difference entre recuperation complete et incomplete.<br><strong>Resultat:</strong> Complete vise le plus recent possible; incomplete vise un point precis.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="rman-intro">
+      <div class="page-shell grid grid-2">
+        <article class="exercise-card">
+          <h3>Examen similaire C</h3>
+          <ul class="bullet-list">
+            <li><strong>Q1.</strong> C’est quoi RMAN ?<br><strong>Resultat:</strong> L’outil Oracle integre de sauvegarde et recuperation.</li>
+            <li><strong>Q2.</strong> A quoi sert <span class="mono">TARGET</span> ?<br><strong>Resultat:</strong> A designer la base cible.</li>
+            <li><strong>Q3.</strong> Pourquoi utiliser <span class="mono">SYSBACKUP</span> ?<br><strong>Resultat:</strong> Pour separer les responsabilites de sauvegarde des autres droits sur les donnees.</li>
+            <li><strong>Q4.</strong> A quoi sert <span class="mono">SHOW ALL</span> ?<br><strong>Resultat:</strong> A afficher les parametres persistants RMAN.</li>
+          </ul>
+        </article>
+
+        <article class="exercise-card" id="catalog">
+          <h3>Examen similaire D</h3>
+          <ul class="bullet-list">
+            <li><strong>Q1.</strong> Control file ou recovery catalog: que stocke le deuxieme de plus utile ?<br><strong>Resultat:</strong> Historique plus riche, scripts stockes, gestion de plusieurs cibles et rapports plus complets.</li>
+            <li><strong>Q2.</strong> Le recovery catalog est-il obligatoire ?<br><strong>Resultat:</strong> Non, RMAN peut fonctionner avec le control file seul.</li>
+            <li><strong>Q3.</strong> Pourquoi prevoir sa taille ?<br><strong>Resultat:</strong> Parce que le volume de metadonnees depend du nombre de bases et de sauvegardes suivies.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="backup-rman">
+      <div class="page-shell grid grid-2">
+        <article class="exercise-card">
+          <h3>Examen similaire E</h3>
+          <ul class="bullet-list">
+            <li><strong>Q1.</strong> Qu’est-ce qu’un incremental level 0 ?<br><strong>Resultat:</strong> Une sauvegarde de base equivalente a une sauvegarde complete de reference.</li>
+            <li><strong>Q2.</strong> Difference cumulative / differentielle ?<br><strong>Resultat:</strong> Cumulative depuis level 0, differentielle depuis le dernier incremental.</li>
+            <li><strong>Q3.</strong> Image copy vs backup set ?<br><strong>Resultat:</strong> La premiere est plus simple a restaurer, le second economise l’espace.</li>
+          </ul>
+        </article>
+
+        <article class="exercise-card" id="recovery-rman">
+          <h3>Examen similaire F</h3>
+          <ul class="bullet-list">
+            <li><strong>Q1.</strong> Role de <span class="mono">RESTORE</span> et de <span class="mono">RECOVER</span>.<br><strong>Resultat:</strong> RESTORE remet les fichiers, RECOVER rejoue les changements.</li>
+            <li><strong>Q2.</strong> Quand utilise-t-on <span class="mono">OPEN RESETLOGS</span> ?<br><strong>Resultat:</strong> Souvent apres recuperation incomplete ou a partir d’un control file de sauvegarde.</li>
+            <li><strong>Q3.</strong> Pourquoi le DBID peut-il etre necessaire ?<br><strong>Resultat:</strong> Pour identifier la base dans certains scenarios de restauration, notamment spfile/control file.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="listener">
+      <div class="page-shell">
+        <article class="exercise-card">
+          <h3>Examen similaire G</h3>
+          <ul class="bullet-list">
+            <li><strong>Q1.</strong> Quel est le role d’un alias TNS ?<br><strong>Resultat:</strong> Fournir un nom simple qui encapsule les details de connexion.</li>
+            <li><strong>Q2.</strong> Quelle commande utilise-t-on pour verifier l’etat du listener ?<br><strong>Resultat:</strong> <span class="mono">lsnrctl status</span>.</li>
+            <li><strong>Q3.</strong> Qui fait quoi entre alias et listener ?<br><strong>Resultat:</strong> L’alias indique ou aller; le listener recoit la connexion et la transfere a l’instance.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

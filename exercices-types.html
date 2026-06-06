@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exercices types examens - Oracle DBA2</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-mark">Entrainement</span>
+        <span class="brand-title">Exercices types avec reponses</span>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html">Accueil</a>
+        <a href="examens-similaires.html">Examens similaires</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-header">
+      <div class="page-shell">
+        <div class="page-header-card">
+          <span class="eyebrow">Corrige rapide</span>
+          <h1>Exercices types d’examen</h1>
+          <p>
+            Les questions ci-dessous reprennent le style des notions demandees dans les supports et dans la feuille d’examen.
+            Chaque reponse est volontairement concise et directement exploitable pour reviser.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="page-shell grid grid-2">
+        <article class="exercise-card" id="utilisateurs">
+          <h3>Utilisateurs, privileges, roles, profils</h3>
+          <ul class="bullet-list">
+            <li><strong>Question:</strong> A quoi sert un profil utilisateur ?<br><strong>Resultat:</strong> A imposer des limites sur les mots de passe et sur certaines ressources systeme pour renforcer la securite et controler l’usage.</li>
+            <li><strong>Question:</strong> Difference entre privilege systeme et privilege objet ?<br><strong>Resultat:</strong> Le privilege systeme autorise une action generale sur la base, le privilege objet porte sur un objet precis.</li>
+            <li><strong>Question:</strong> Pourquoi utiliser un role ?<br><strong>Resultat:</strong> Pour regrouper plusieurs privileges et simplifier leur attribution et leur maintenance.</li>
+            <li><strong>Question:</strong> Elements importants lors de la creation d’un utilisateur ?<br><strong>Resultat:</strong> Authentification, tablespace par defaut, tablespace temporaire, quotas et droits initiaux.</li>
+          </ul>
+        </article>
+
+        <article class="exercise-card" id="backup">
+          <h3>Backup &amp; recovery de base</h3>
+          <ul class="bullet-list">
+            <li><strong>Question:</strong> Difference entre restauration et recuperation ?<br><strong>Resultat:</strong> Restaurer = remettre un fichier depuis une sauvegarde. Recuperer = reappliquer les changements pour revenir a l’etat voulu.</li>
+            <li><strong>Question:</strong> Qu’est-ce qu’une panne d’instance ?<br><strong>Resultat:</strong> Un arret inattendu de l’instance, souvent gere ensuite par une recuperation automatique au redemarrage.</li>
+            <li><strong>Question:</strong> A quoi sert la FRA ?<br><strong>Resultat:</strong> A centraliser l’espace et les fichiers lies au recovery: backups, archived logs, copies, autobackups, etc.</li>
+          </ul>
+        </article>
+
+        <article class="exercise-card" id="rman-intro">
+          <h3>RMAN intro</h3>
+          <ul class="bullet-list">
+            <li><strong>Question:</strong> Pourquoi RMAN est-il prefere a une copie manuelle ?<br><strong>Resultat:</strong> Parce qu’il connait la structure Oracle, gere les metadonnees et automatise backup + recovery.</li>
+            <li><strong>Question:</strong> Role de <span class="mono">TARGET</span> ?<br><strong>Resultat:</strong> Il designe la base cible lors de la connexion ou de l’operation RMAN.</li>
+            <li><strong>Question:</strong> A quoi sert <span class="mono">SHOW ALL</span> ?<br><strong>Resultat:</strong> A afficher la configuration persistante RMAN.</li>
+          </ul>
+        </article>
+
+        <article class="exercise-card" id="catalog">
+          <h3>Recovery Catalog</h3>
+          <ul class="bullet-list">
+            <li><strong>Question:</strong> Qu’est-ce qu’un recovery catalog ?<br><strong>Resultat:</strong> Une base separee qui stocke les metadonnees RMAN sur les sauvegardes et restaurations.</li>
+            <li><strong>Question:</strong> Pourquoi l’utiliser ?<br><strong>Resultat:</strong> Pour l’historique, les scripts stockes, les rapports et la gestion multi-cibles.</li>
+          </ul>
+        </article>
+
+        <article class="exercise-card" id="backup-rman">
+          <h3>Sauvegardes RMAN</h3>
+          <ul class="bullet-list">
+            <li><strong>Question:</strong> Difference entre incremental level 1 cumulative et differentielle ?<br><strong>Resultat:</strong> La cumulative reprend les changements depuis le niveau 0; la differentielle depuis le dernier incremental.</li>
+            <li><strong>Question:</strong> Image copy ou backup set ?<br><strong>Resultat:</strong> Image copy restaure plus vite mais occupe plus d’espace; backup set economise l’espace mais rallonge la reprise.</li>
+            <li><strong>Question:</strong> A quoi sert le block change tracking ?<br><strong>Resultat:</strong> A accelerer la detection des blocs modifies pour les sauvegardes incrementales.</li>
+          </ul>
+        </article>
+
+        <article class="exercise-card" id="recovery-rman">
+          <h3>Recovery RMAN</h3>
+          <ul class="bullet-list">
+            <li><strong>Question:</strong> Quand parle-t-on de recuperation incomplete ?<br><strong>Resultat:</strong> Lorsqu’on veut revenir a un point de temps ou SCN cible, pas forcement au plus recent possible.</li>
+            <li><strong>Question:</strong> Pourquoi <span class="mono">RESETLOGS</span> apparait souvent ?<br><strong>Resultat:</strong> Parce qu’apres certaines recuperations, surtout avec control file de sauvegarde ou reprise incomplete, il faut ouvrir une nouvelle incarnation logique.</li>
+          </ul>
+        </article>
+
+        <article class="exercise-card" id="listener">
+          <h3>Listener et alias</h3>
+          <ul class="bullet-list">
+            <li><strong>Question:</strong> Role du listener ?<br><strong>Resultat:</strong> Ecouter les demandes de connexion entrantes et les diriger vers l’instance appropriee.</li>
+            <li><strong>Question:</strong> Difference entre <span class="mono">listener.ora</span> et <span class="mono">tnsnames.ora</span> ?<br><strong>Resultat:</strong> Le premier configure le listener cote serveur; le second decrit les alias de connexion cote client.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

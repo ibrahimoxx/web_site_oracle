@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RMAN Intro - Resume chapitre</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-mark">Partie 3</span>
+        <span class="brand-title">Introduction a RMAN</span>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html">Accueil</a>
+        <a href="tp-rman-intro.html">Resume TP</a>
+        <a href="exercices-types.html#rman-intro">Exercices types</a>
+        <a href="examens-similaires.html#rman-intro">Examens similaires</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-header">
+      <div class="page-shell">
+        <div class="page-header-card">
+          <span class="eyebrow">Cours seulement</span>
+          <h1>RMAN, c’est quoi et comment on le pilote</h1>
+          <p>
+            RMAN est le gestionnaire de sauvegarde et de recuperation integre a Oracle. Cette partie du cours
+            explique son interet, sa connexion, ses commandes, sa configuration et sa politique de retention.
+          </p>
+          <div class="page-anchor-nav">
+            <a href="#definition">Definition</a>
+            <a href="#connexion">Connexion</a>
+            <a href="#commandes">Commandes</a>
+            <a href="#config">Configuration</a>
+            <a href="#retention">Retention</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="definition">
+      <div class="page-shell columns">
+        <article class="panel topic-block">
+          <h2>1. Definition et interet</h2>
+          <p>
+            RMAN signifie <span class="mono">Recovery Manager</span>. C’est l’outil Oracle integre pour gerer
+            les sauvegardes et recuperations de la base avec une connaissance interne de sa structure.
+          </p>
+          <ul class="bullet-list">
+            <li>Il comprend les tablespaces, datafiles, control files et archived redo logs.</li>
+            <li>Il valide les blocs et sait optimiser certains traitements.</li>
+            <li>Il gere la FRA, les sauvegardes multistream et plusieurs supports de stockage.</li>
+          </ul>
+        </article>
+
+        <aside class="panel">
+          <h2>Pourquoi RMAN est superieur a une copie manuelle</h2>
+          <ul class="check-list">
+            <li>Il connait la structure Oracle.</li>
+            <li>Il sait faire des backups incrementaux.</li>
+            <li>Il sait recuperer proprement.</li>
+            <li>Il trace l’historique des operations.</li>
+          </ul>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section" id="connexion">
+      <div class="page-shell">
+        <article class="panel topic-block">
+          <h2>2. Connexion a RMAN</h2>
+          <ul class="bullet-list">
+            <li>Le mot-cle <span class="mono">TARGET</span> designe la base cible de la sauvegarde ou de la recuperation.</li>
+            <li>Le cours met en avant l’utilisation du privilege <span class="mono">SYSBACKUP</span>.</li>
+            <li>Le but est de separer les responsabilites: un DBA backup n’a pas besoin d’avoir les privileges d’acces aux donnees applicatives.</li>
+          </ul>
+          <div class="callout">
+            Pour l’examen, il faut savoir expliquer que <span class="mono">SYSBACKUP</span> couvre les actions
+            de sauvegarde et de recovery sans ouvrir tous les droits fonctionnels sur les donnees.
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="commandes">
+      <div class="page-shell columns">
+        <article class="panel topic-block">
+          <h2>3. Types de commandes</h2>
+          <ul class="bullet-list">
+            <li><strong>Stand-alone command</strong>: commande executee seule.</li>
+            <li><strong>Job command</strong>: suite de commandes executees dans un bloc <span class="mono">RUN { ... }</span>.</li>
+            <li>RMAN accepte aussi des requetes SQL et meme certaines procedures PL/SQL.</li>
+          </ul>
+
+          <h3>Scripts RMAN</h3>
+          <p>
+            Le cours insiste sur leurs avantages: automatisation, consistance et reduction des erreurs humaines.
+          </p>
+        </article>
+
+        <aside class="panel">
+          <h2>A connaitre</h2>
+          <ul class="check-list">
+            <li><span class="mono">RUN</span> pour grouper.</li>
+            <li><span class="mono">SQL</span> pour lancer des requetes Oracle.</li>
+            <li><span class="mono">SHOW</span> pour afficher les parametres.</li>
+            <li><span class="mono">CONFIGURE</span> pour modifier un parametre persistant.</li>
+          </ul>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section" id="config">
+      <div class="page-shell">
+        <article class="panel topic-block">
+          <h2>4. Parametres RMAN</h2>
+          <p>
+            RMAN dispose d’une configuration persistante modifiable selon les besoins. Le cours cite notamment
+            la politique de retention, les formats de sauvegarde, l’optimisation ou les copies de sauvegarde.
+          </p>
+          <ul class="bullet-list">
+            <li><span class="mono">SHOW ALL</span> affiche tous les parametres.</li>
+            <li><span class="mono">V$RMAN_CONFIGURATION</span> montre les parametres explicitement configures.</li>
+            <li><span class="mono">CONFIGURE</span> modifie un parametre.</li>
+            <li><span class="mono">CLEAR</span> remet un parametre a son comportement par defaut.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="retention">
+      <div class="page-shell">
+        <article class="panel topic-block">
+          <h2>5. Politique de retention</h2>
+          <p>
+            La retention policy determine quelles sauvegardes sont encore necessaires pour assurer un niveau de reprise,
+            et lesquelles deviennent obsoletes.
+          </p>
+          <ul class="bullet-list">
+            <li>Elle sert a piloter la conservation.</li>
+            <li>Elle influence le nettoyage des sauvegardes obsoletes.</li>
+            <li>Elle doit etre coherente avec le besoin metier: nombre de copies ou fenetre de recovery.</li>
+          </ul>
+        </article>
+
+        <div class="panel">
+          <h2>Resume flash</h2>
+          <p>
+            Cette partie presente RMAN comme l’outil de reference. Ce n’est pas seulement un lanceur de backup:
+            c’est aussi un cadre de configuration, de scripts, de retention et de reprise.
+          </p>
+          <div class="button-row">
+            <a class="button-link secondary" href="tp-rman-intro.html">Voir le resume TP associe</a>
+            <a class="button-link" href="exercices-types.html#rman-intro">Voir les exercices types</a>
+            <a class="button-link ghost" href="examens-similaires.html#rman-intro">Voir les examens similaires</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="page-shell">
+      <div class="footer-card">Cette page est theorique et isolee du TP RMAN intro.</div>
+    </div>
+  </footer>
+</body>
+</html>

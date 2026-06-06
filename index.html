@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oracle DBA2 Resume Complet</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-mark">Oracle Admin II</span>
+        <span class="brand-title">Resume Web Premium</span>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html">Vue globale</a>
+        <a href="chapitre-utilisateurs.html">Chapitre 1</a>
+        <a href="chapitre-backup-recovery.html">Chapitre 2</a>
+        <a href="chapitre-rman-intro.html">RMAN Intro</a>
+        <a href="chapitre-recovery-catalog.html">Recovery Catalog</a>
+        <a href="chapitre-sauvegardes-rman.html">Sauvegardes RMAN</a>
+        <a href="chapitre-restauration-rman.html">Recovery RMAN</a>
+        <a href="chapitre-listener-alias.html">Listener</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="page-shell">
+        <div class="hero-card">
+          <span class="eyebrow">Cours uniquement • sans TP dans ce resume</span>
+          <h1>Resume complet du module Oracle pour revision d’examen.</h1>
+          <p class="hero-lead">
+            Cette page condense tout le module en mode theorie pure. Les TPs sont volontairement exclus d’ici
+            et sont ranges dans des pages separees. L’objectif est de revoir rapidement la logique du cours,
+            les definitions, les differences importantes, les architectures et les commandes a reconnaitre.
+          </p>
+
+          <div class="key-grid">
+            <div class="key-stat">
+              <strong>7</strong>
+              parties du module
+            </div>
+            <div class="key-stat">
+              <strong>2</strong>
+              grands blocs d’examen
+            </div>
+            <div class="key-stat">
+              <strong>5</strong>
+              pages TP separees
+            </div>
+            <div class="key-stat">
+              <strong>1</strong>
+              vue globale pour reviser vite
+            </div>
+          </div>
+
+          <div class="hero-grid">
+            <div class="hero-panel">
+              <h2>Comment utiliser le site</h2>
+              <ul class="check-list">
+                <li>Commencer ici pour avoir la carte mentale complete du module.</li>
+                <li>Ouvrir ensuite chaque chapitre pour la version plus detaillee, toujours sans TP.</li>
+                <li>Utiliser les boutons TP seulement apres avoir compris le cours.</li>
+                <li>Terminer avec les exercices types et les examens similaires pour tester la memoire.</li>
+              </ul>
+            </div>
+            <div class="hero-panel">
+              <h2>Architecture reelle du module</h2>
+              <ul class="bullet-list">
+                <li>Securite Oracle: utilisateurs, privileges, roles, profils.</li>
+                <li>Backup &amp; recovery: pannes, restauration, recuperation, FRA, archivage.</li>
+                <li>RMAN: introduction, configuration, retention, catalog, backup, restore.</li>
+                <li>Reseau Oracle: listener, alias TNS, fichiers de configuration.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="page-shell">
+        <div class="section-header">
+          <div>
+            <div class="section-kicker">Navigation principale</div>
+            <h2 class="section-title">Pages de resume par chapitre</h2>
+          </div>
+          <p class="section-note">
+            Toutes ces pages sont basees sur le contenu du cours seulement. Chaque page contient ensuite des liens
+            vers la page TP correspondante et vers les entrainements d’examen.
+          </p>
+        </div>
+
+        <div class="grid grid-3">
+          <article class="chapter-card">
+            <div class="meta-line">
+              <span class="pill">Chapitre 1</span>
+              <span class="pill secondary">Securite Oracle</span>
+            </div>
+            <h3>Utilisateurs, privileges, roles, profils</h3>
+            <p>Base de la securite logique Oracle: authentification, quotas, privileges systeme et objet, roles et politique de mot de passe.</p>
+            <div class="button-row">
+              <a class="button-link" href="chapitre-utilisateurs.html">Voir le resume</a>
+            </div>
+          </article>
+
+          <article class="chapter-card">
+            <div class="meta-line">
+              <span class="pill">Chapitre 2</span>
+              <span class="pill secondary">Backup &amp; Recovery</span>
+            </div>
+            <h3>Sauvegarde et recuperation</h3>
+            <p>Roles du DBA, types de pannes, restauration contre recuperation, instance recovery, FRA et mode archive.</p>
+            <div class="button-row">
+              <a class="button-link" href="chapitre-backup-recovery.html">Voir le resume</a>
+            </div>
+          </article>
+
+          <article class="chapter-card">
+            <div class="meta-line">
+              <span class="pill">Partie 3</span>
+              <span class="pill secondary">RMAN</span>
+            </div>
+            <h3>Introduction a RMAN</h3>
+            <p>Connexion, interet, types de commandes, requetes SQL, configuration et politique de retention.</p>
+            <div class="button-row">
+              <a class="button-link" href="chapitre-rman-intro.html">Voir le resume</a>
+            </div>
+          </article>
+
+          <article class="chapter-card">
+            <div class="meta-line">
+              <span class="pill">Partie 4</span>
+              <span class="pill secondary">RMAN</span>
+            </div>
+            <h3>Recovery Catalog</h3>
+            <p>Pourquoi un catalogue de recuperation existe, ce qu’il ajoute au control file et quand il devient utile.</p>
+            <div class="button-row">
+              <a class="button-link" href="chapitre-recovery-catalog.html">Voir le resume</a>
+            </div>
+          </article>
+
+          <article class="chapter-card">
+            <div class="meta-line">
+              <span class="pill">Partie 5</span>
+              <span class="pill secondary">RMAN</span>
+            </div>
+            <h3>Sauvegardes avec RMAN</h3>
+            <p>Strategie de backup, full vs incremental, image copy vs backup set, compression et cryptage.</p>
+            <div class="button-row">
+              <a class="button-link" href="chapitre-sauvegardes-rman.html">Voir le resume</a>
+            </div>
+          </article>
+
+          <article class="chapter-card">
+            <div class="meta-line">
+              <span class="pill">Partie 6</span>
+              <span class="pill secondary">RMAN</span>
+            </div>
+            <h3>Restauration et recuperation avec RMAN</h3>
+            <p>Restore et recover, recuperation complete ou incomplete, perte de control file, spfile et datafiles critiques.</p>
+            <div class="button-row">
+              <a class="button-link" href="chapitre-restauration-rman.html">Voir le resume</a>
+            </div>
+          </article>
+
+          <article class="chapter-card">
+            <div class="meta-line">
+              <span class="pill">Partie reseau</span>
+              <span class="pill secondary">Oracle Net</span>
+            </div>
+            <h3>Listener et alias TNS</h3>
+            <p>Connexion reseau Oracle, role du listener, listener.ora, tnsnames.ora et commandes LSNRCTL.</p>
+            <div class="button-row">
+              <a class="button-link" href="chapitre-listener-alias.html">Voir le resume</a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="page-shell">
+        <div class="section-header">
+          <div>
+            <div class="section-kicker">Ultra resume</div>
+            <h2 class="section-title">Le module en une seule lecture</h2>
+          </div>
+          <p class="section-note">
+            Si tu n’as que quelques minutes, retiens surtout les oppositions, les definitions et les composants.
+          </p>
+        </div>
+
+        <div class="grid grid-2">
+          <article class="summary-card">
+            <h3>1. Securite Oracle</h3>
+            <ul class="bullet-list">
+              <li>Oracle est un SGBD multiutilisateur, donc il faut definir qui se connecte, ce qu’il peut faire et dans quel espace il peut travailler.</li>
+              <li>La creation d’un utilisateur implique un nom, une methode d’authentification, un tablespace par defaut, un tablespace temporaire, des quotas et des privileges ou roles.</li>
+              <li>L’authentification peut etre geree par la base ou par le systeme d’exploitation.</li>
+              <li>Un privilege systeme autorise une action generale sur la base, alors qu’un privilege objet autorise une action sur un objet precis.</li>
+              <li>Un role est un ensemble nomme de privileges que l’on attribue a un utilisateur pour simplifier l’administration.</li>
+              <li>Un profil impose des limites sur les mots de passe et sur certaines ressources systeme.</li>
+            </ul>
+          </article>
+
+          <article class="summary-card">
+            <h3>2. Backup &amp; recovery classique</h3>
+            <ul class="bullet-list">
+              <li>Le DBA cherche a augmenter le MTBF, reduire le MTTR et minimiser la perte de donnees.</li>
+              <li>Il existe plusieurs types de pannes: echec d’instruction, echec de session, panne reseau, erreur utilisateur, panne d’instance et panne physique.</li>
+              <li>Restaurer signifie recopier un fichier depuis une sauvegarde. Recuperer signifie appliquer les modifications necessaires pour remettre le fichier a jour.</li>
+              <li>La recuperation d’instance est automatique au redemarrage si les datafiles n’etaient pas synchronises a l’arret.</li>
+              <li>La recuperation peut etre complete si l’on revient a l’etat le plus recent possible, ou incomplete si l’on vise un instant precis.</li>
+              <li>La FRA centralise plusieurs fichiers critiques de recovery et simplifie la gestion de l’espace reserve a la recuperation.</li>
+            </ul>
+          </article>
+
+          <article class="summary-card">
+            <h3>3. RMAN essentiel</h3>
+            <ul class="bullet-list">
+              <li>RMAN est l’outil Oracle integre pour gerer les sauvegardes et recuperations avec connaissance interne de la base.</li>
+              <li>On s’y connecte sur une base cible avec le mot-cle <span class="mono">TARGET</span>, souvent via le privilege <span class="mono">SYSBACKUP</span>.</li>
+              <li>RMAN sait executer des commandes propres a RMAN, mais aussi des requetes SQL et PL/SQL.</li>
+              <li>La commande <span class="mono">SHOW ALL</span> affiche la configuration persistante; <span class="mono">CONFIGURE</span> modifie les parametres.</li>
+              <li>La politique de retention sert a decider quelles sauvegardes restent utiles et lesquelles deviennent obsoletes.</li>
+            </ul>
+          </article>
+
+          <article class="summary-card">
+            <h3>4. Recovery Catalog</h3>
+            <ul class="bullet-list">
+              <li>RMAN peut stocker ses metadonnees soit dans le control file, soit dans un recovery catalog externe.</li>
+              <li>Le recovery catalog est une base separee qui conserve l’historique des sauvegardes, les scripts stockes et des informations plus riches.</li>
+              <li>Il devient plus interessant quand on veut historiser davantage, gerer plusieurs bases cibles ou produire des rapports plus complets.</li>
+            </ul>
+          </article>
+
+          <article class="summary-card">
+            <h3>5. Sauvegardes RMAN</h3>
+            <ul class="bullet-list">
+              <li>Une strategie de sauvegarde depend de la disponibilite attendue, du volume de stockage, du type de base et du delai de reprise.</li>
+              <li>Full backup sauvegarde tous les blocs utiles. Une sauvegarde incremental level 0 joue le role de base complete.</li>
+              <li>Incremental level 1 cumulative sauvegarde les changements depuis le niveau 0, alors que la differentielle sauvegarde les changements depuis le dernier incremental.</li>
+              <li>Image copy occupe plus d’espace mais accelere la restauration. Backup set consomme moins d’espace mais ajoute un cout de decompression lors de la reprise.</li>
+              <li>RMAN peut inclure control files, spfile, archivelogs, et peut aussi compresser ou chiffrer les sauvegardes.</li>
+            </ul>
+          </article>
+
+          <article class="summary-card">
+            <h3>6. Restore &amp; recover RMAN</h3>
+            <ul class="bullet-list">
+              <li><span class="mono">RESTORE</span> replace les fichiers depuis une sauvegarde. <span class="mono">RECOVER</span> applique redo et archives pour les remettre au bon etat.</li>
+              <li>En recuperation complete, on vise la version la plus recente possible des donnees valides.</li>
+              <li>En recuperation incomplete, on s’arrete a une date, une heure ou un SCN precis, ce qui impose souvent <span class="mono">OPEN RESETLOGS</span>.</li>
+              <li>RMAN sait recuperer des datafiles critiques, un control file de sauvegarde et un spfile, sous reserve d’avoir les sauvegardes adequates.</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="accent-band">
+          <strong>Lecture mentale pour l’examen:</strong>
+          pense toujours en chaine logique: securiser l’acces a la base, proteger les fichiers critiques, sauvegarder regulierement,
+          puis savoir restaurer et recuperer selon le type de panne.
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="page-shell">
+        <div class="section-header">
+          <div>
+            <div class="section-kicker">Liens de travail</div>
+            <h2 class="section-title">Pages TP et entrainement</h2>
+          </div>
+          <p class="section-note">
+            Ici, on passe du savoir theorique au savoir operatoire. Les pages ci-dessous contiennent les resumés TP
+            uniquement, puis des exercices types et des examens similaires avec resultats.
+          </p>
+        </div>
+
+        <div class="panel">
+          <div class="button-row">
+            <a class="button-link secondary" href="tp-utilisateurs.html">TP securite Oracle</a>
+            <a class="button-link secondary" href="tp-backup-recovery.html">TP backup &amp; FRA</a>
+            <a class="button-link secondary" href="tp-rman-intro.html">TP RMAN intro</a>
+            <a class="button-link secondary" href="tp-sauvegardes-rman.html">TP sauvegardes RMAN</a>
+            <a class="button-link secondary" href="tp-restauration-rman.html">TP recovery RMAN</a>
+            <a class="button-link" href="exercices-types.html">Exercices types examens</a>
+            <a class="button-link ghost" href="examens-similaires.html">Examens similaires corriges</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="page-shell">
+      <div class="footer-card">
+        Resume genere a partir des supports de cours du dossier, en separant strictement la theorie et les TPs.
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

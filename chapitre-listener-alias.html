@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Listener et alias Oracle - Resume chapitre</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-mark">Partie reseau</span>
+        <span class="brand-title">Listener &amp; TNS</span>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html">Accueil</a>
+        <a href="exercices-types.html#listener">Exercices types</a>
+        <a href="examens-similaires.html#listener">Examens similaires</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-header">
+      <div class="page-shell">
+        <div class="page-header-card">
+          <span class="eyebrow">Support de cours reseau</span>
+          <h1>Listener Oracle et configuration des alias</h1>
+          <p>
+            Cette partie explique comment une connexion reseau Oracle atteint l’instance:
+            le client utilise un alias TNS, le listener ecoute sur un port, puis redirige vers la base cible.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="page-shell grid grid-2">
+        <article class="panel topic-block">
+          <h2>1. Qu’est-ce qu’un listener</h2>
+          <ul class="bullet-list">
+            <li>Processus serveur independant de la base.</li>
+            <li>Ecoute les demandes de connexion entrantes.</li>
+            <li>Ecoute en general sur TCP/IP, souvent port 1521.</li>
+            <li>Dirige la demande vers l’instance appropriee.</li>
+          </ul>
+        </article>
+
+        <article class="panel topic-block">
+          <h2>2. Fichiers de configuration</h2>
+          <ul class="bullet-list">
+            <li><span class="mono">listener.ora</span>: configuration du listener cote serveur.</li>
+            <li><span class="mono">tnsnames.ora</span>: alias de connexion cote client.</li>
+            <li><span class="mono">sqlnet.ora</span>: parametres reseau globaux.</li>
+          </ul>
+        </article>
+
+        <article class="panel topic-block">
+          <h2>3. Elements de listener.ora</h2>
+          <ul class="bullet-list">
+            <li><span class="mono">PROTOCOL</span>: protocole de transport.</li>
+            <li><span class="mono">HOST</span>: machine serveur.</li>
+            <li><span class="mono">PORT</span>: port d’ecoute.</li>
+            <li><span class="mono">SID_NAME</span> ou service concerne.</li>
+          </ul>
+        </article>
+
+        <article class="panel topic-block">
+          <h2>4. Alias TNS</h2>
+          <p>
+            Un alias TNS remplace une description longue de connexion par un nom simple.
+            Le client appelle cet alias, qui encapsule hote, port et service_name.
+          </p>
+        </article>
+
+        <article class="panel topic-block">
+          <h2>5. Comment tout fonctionne ensemble</h2>
+          <ol class="bullet-list">
+            <li>Le client lance une connexion vers un alias.</li>
+            <li>L’alias est resolu en hote, port et service.</li>
+            <li>Le listener recoit la demande.</li>
+            <li>Le listener transfere la connexion a l’instance cible.</li>
+          </ol>
+        </article>
+
+        <article class="panel topic-block">
+          <h2>6. Commandes LSNRCTL a connaitre</h2>
+          <ul class="bullet-list">
+            <li><span class="mono">lsnrctl start</span></li>
+            <li><span class="mono">lsnrctl stop</span></li>
+            <li><span class="mono">lsnrctl status</span></li>
+            <li><span class="mono">lsnrctl reload</span></li>
+            <li><span class="mono">lsnrctl services</span></li>
+          </ul>
+        </article>
+      </div>
+
+      <div class="page-shell">
+        <div class="panel">
+          <h2>Resume flash</h2>
+          <p>
+            L’alias dit ou aller, le listener accueille la demande, puis l’instance prend la main.
+            C’est la formule la plus simple a retenir pour expliquer le mecanisme.
+          </p>
+          <div class="button-row">
+            <a class="button-link" href="exercices-types.html#listener">Voir les exercices types</a>
+            <a class="button-link ghost" href="examens-similaires.html#listener">Voir les examens similaires</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="page-shell">
+      <div class="footer-card">Cette partie reseau a ete integree comme resume theorique independant.</div>
+    </div>
+  </footer>
+</body>
+</html>

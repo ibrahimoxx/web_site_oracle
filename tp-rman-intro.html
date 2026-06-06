@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TP Resume - RMAN intro</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-mark">TP RMAN</span>
+        <span class="brand-title">Premiere connexion et configuration</span>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html">Accueil</a>
+        <a href="chapitre-rman-intro.html">Resume cours</a>
+        <a href="exercices-types.html#rman-intro">Exercices types</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-header">
+      <div class="page-shell">
+        <div class="page-header-card">
+          <span class="eyebrow">TP seulement</span>
+          <h1>Resume TP introduction a RMAN</h1>
+          <p>
+            Manipulations de premiere prise en main: connexion a RMAN, premier backup,
+            lecture des parametres et changement de destination de sauvegarde.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="page-shell grid grid-2">
+        <article class="panel topic-block">
+          <h2>1. Prise en main</h2>
+          <ul class="bullet-list">
+            <li>Connexion avec la base cible.</li>
+            <li>Premier backup standard.</li>
+            <li>Backup avec archived redo logs.</li>
+            <li>Suppression des sauvegardes obsoletes.</li>
+          </ul>
+        </article>
+
+        <article class="panel topic-block">
+          <h2>2. Requetes et parametres</h2>
+          <ul class="bullet-list">
+            <li>Execution de requetes SQL depuis RMAN.</li>
+            <li>Usage de <span class="mono">SHOW ALL</span>.</li>
+            <li>Verification d’un parametre precis avec <span class="mono">SHOW</span>.</li>
+            <li>Remise a zero avec <span class="mono">CONFIGURE ... CLEAR</span>.</li>
+          </ul>
+        </article>
+
+        <article class="panel topic-block">
+          <h2>3. Destination de sauvegarde</h2>
+          <ul class="bullet-list">
+            <li>Verifier la destination par defaut via SQL*Plus.</li>
+            <li>Constater le lien entre RMAN et la FRA.</li>
+            <li>Changer la destination via parametre Oracle si besoin.</li>
+          </ul>
+        </article>
+
+        <article class="panel topic-block">
+          <h2>4. NLS et affichage</h2>
+          <ul class="bullet-list">
+            <li>Observer les parametres <span class="mono">NLS</span>.</li>
+            <li>Modifier temporairement une session.</li>
+            <li>Comprendre le besoin d’un affichage de date plus detaille pour lire <span class="mono">LIST BACKUP</span>.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

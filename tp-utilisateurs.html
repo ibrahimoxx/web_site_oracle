@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TP Resume - Utilisateurs, privileges, roles</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-mark">TP securite</span>
+        <span class="brand-title">Utilisateurs, privileges, roles, mots de passe</span>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html">Accueil</a>
+        <a href="chapitre-utilisateurs.html">Resume cours</a>
+        <a href="exercices-types.html#utilisateurs">Exercices types</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-header">
+      <div class="page-shell">
+        <div class="page-header-card">
+          <span class="eyebrow">TP seulement</span>
+          <h1>Resume TP securite Oracle</h1>
+          <p>
+            Cette page ne resume pas le cours theorique. Elle condense uniquement les operations pratiques
+            vues dans le TP sur les utilisateurs, les privileges, les roles et les mots de passe.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="page-shell grid grid-2">
+        <article class="panel topic-block">
+          <h2>1. Creer et configurer des utilisateurs</h2>
+          <ul class="bullet-list">
+            <li>Creer un utilisateur avec mot de passe et tablespace par defaut.</li>
+            <li>Verifier qu’aucun objet parasite n’est cree dans le tablespace SYSTEM.</li>
+            <li>Attribuer un quota sur le tablespace cible.</li>
+            <li>Donner les privileges minimums de connexion et de creation.</li>
+          </ul>
+        </article>
+
+        <article class="panel topic-block">
+          <h2>2. Verification via dictionnaire</h2>
+          <ul class="bullet-list">
+            <li>Consulter <span class="mono">DBA_USERS</span> pour l’etat des comptes.</li>
+            <li>Consulter <span class="mono">DBA_OBJECTS</span>, <span class="mono">DBA_SEGMENTS</span> et vues d’espace libre.</li>
+            <li>Verifier quotas et tablespaces associes a l’utilisateur.</li>
+          </ul>
+        </article>
+
+        <article class="panel topic-block">
+          <h2>3. Privileges et donnees</h2>
+          <ul class="bullet-list">
+            <li>Donner <span class="mono">CREATE SESSION</span> et <span class="mono">CREATE TABLE</span>.</li>
+            <li>Copier une table du schema SCOTT dans un autre schema.</li>
+            <li>Accorder a un autre utilisateur le droit de lire une table precise.</li>
+            <li>Tester le cas <span class="mono">WITH GRANT OPTION</span>.</li>
+          </ul>
+        </article>
+
+        <article class="panel topic-block">
+          <h2>4. Mots de passe et maintenance</h2>
+          <ul class="bullet-list">
+            <li>Changer un mot de passe via <span class="mono">ALTER USER</span>.</li>
+            <li>Expirer le mot de passe pour forcer un changement a la prochaine connexion.</li>
+            <li>Supprimer un quota ou supprimer un utilisateur si necessaire.</li>
+          </ul>
+        </article>
+      </div>
+
+      <div class="page-shell">
+        <div class="panel">
+          <h2>Ce que le TP t’apprend vraiment</h2>
+          <p>
+            Passer de la theorie de securite aux commandes DBA concretes: creation d’identites Oracle,
+            controle de l’espace, verification des vues de dictionnaire et distribution pratique des droits.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

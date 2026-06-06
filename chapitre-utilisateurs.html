@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chapitre 1 - Utilisateurs, roles, privileges, profils</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-mark">Chapitre 1</span>
+        <span class="brand-title">Securite Oracle</span>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html">Accueil</a>
+        <a href="tp-utilisateurs.html">Resume TP</a>
+        <a href="exercices-types.html#utilisateurs">Exercices types</a>
+        <a href="examens-similaires.html#utilisateurs">Examens similaires</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-header">
+      <div class="page-shell">
+        <div class="page-header-card">
+          <span class="eyebrow">Cours seulement</span>
+          <h1>Gestion des utilisateurs, des privileges, des roles et des profils</h1>
+          <p>
+            Ce chapitre traite toute la securite logique de base dans Oracle: qui entre dans la base,
+            avec quels droits, dans quel espace de travail, et avec quelles contraintes de mot de passe
+            et de ressources.
+          </p>
+          <div class="page-anchor-nav">
+            <a href="#idee-cle">Idee cle</a>
+            <a href="#utilisateurs">Utilisateurs</a>
+            <a href="#privileges">Privileges</a>
+            <a href="#roles">Roles</a>
+            <a href="#profils">Profils</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="idee-cle">
+      <div class="page-shell columns">
+        <article class="panel topic-block">
+          <h2>Idee cle du chapitre</h2>
+          <p>
+            Oracle etant un SGBD multiutilisateur, la securite ne se limite pas a bloquer l’acces.
+            Il faut aussi organiser les droits de facon fine. Un utilisateur doit pouvoir se connecter,
+            creer ou lire uniquement ce qui lui est permis, consommer un espace controle et respecter
+            une politique de mot de passe.
+          </p>
+          <div class="quote-box">
+            Un bon administrateur ne donne pas tous les droits a tout le monde. Il affecte le minimum
+            necessaire, puis structure les autorisations pour qu’elles restent simples a maintenir.
+          </div>
+        </article>
+
+        <aside class="panel">
+          <h2>Ce qu’il faut absolument retenir</h2>
+          <ul class="check-list">
+            <li>Utilisateur = identite Oracle.</li>
+            <li>Privilege systeme = action generale sur la base.</li>
+            <li>Privilege objet = action sur un objet precis.</li>
+            <li>Role = groupe de privileges.</li>
+            <li>Profil = limites de mot de passe et de ressources.</li>
+          </ul>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section" id="utilisateurs">
+      <div class="page-shell">
+        <article class="panel topic-block">
+          <h2>1. Gestion des utilisateurs</h2>
+          <h3>Ce qu’on decide lors de la creation</h3>
+          <ul class="bullet-list">
+            <li>Le nom de l’utilisateur.</li>
+            <li>La methode d’authentification.</li>
+            <li>Le tablespace par defaut et le tablespace temporaire.</li>
+            <li>Les quotas sur les tablespaces.</li>
+            <li>Les roles et privileges de depart.</li>
+          </ul>
+
+          <h3>Authentification</h3>
+          <ul class="bullet-list">
+            <li>Par la base de donnees: mode le plus courant, Oracle verifie l’identifiant et le mot de passe.</li>
+            <li>Par le systeme d’exploitation: Oracle s’appuie sur l’authentification du systeme.</li>
+          </ul>
+
+          <h3>Operations essentielles sur l’utilisateur</h3>
+          <ul class="bullet-list">
+            <li>Creation avec <span class="mono">CREATE USER</span>.</li>
+            <li>Modification avec <span class="mono">ALTER USER</span>.</li>
+            <li>Suppression avec <span class="mono">DROP USER</span>, eventuellement avec suppression du schema.</li>
+            <li>Consultation des informations avec des vues comme <span class="mono">DBA_USERS</span>.</li>
+          </ul>
+
+          <div class="callout">
+            Le cours insiste sur le fait qu’un utilisateur ne se resume pas a un login. Il a aussi un ancrage
+            dans l’espace de stockage via les tablespaces et les quotas.
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="privileges">
+      <div class="page-shell">
+        <article class="panel topic-block">
+          <h2>2. Gestion des privileges</h2>
+          <p>
+            Les privileges servent a securiser l’acces aux ressources Oracle. Le chapitre distingue
+            clairement deux familles.
+          </p>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Definition</th>
+                  <th>Exemples</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Privilege systeme</td>
+                  <td>Autorise une action generale sur la base ou sur des categories d’objets.</td>
+                  <td><span class="mono">CREATE SESSION</span>, <span class="mono">CREATE TABLE</span>, <span class="mono">CREATE TABLESPACE</span></td>
+                </tr>
+                <tr>
+                  <td>Privilege objet</td>
+                  <td>Autorise une action sur un objet donne appartenant a un schema.</td>
+                  <td><span class="mono">SELECT</span>, <span class="mono">INSERT</span>, <span class="mono">UPDATE</span>, <span class="mono">DELETE</span> sur une table</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Gestion pratique</h3>
+          <ul class="bullet-list">
+            <li>Accorder avec <span class="mono">GRANT</span>.</li>
+            <li>Retirer avec <span class="mono">REVOKE</span>.</li>
+            <li>Le privilege peut etre direct ou transmis via un role.</li>
+            <li>Pour les privileges objet, on peut parfois accorder avec <span class="mono">WITH GRANT OPTION</span> selon le contexte.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="roles">
+      <div class="page-shell columns">
+        <article class="panel topic-block">
+          <h2>3. Gestion des roles</h2>
+          <p>
+            Un role est un regroupement nomme de privileges. L’interet est administratif:
+            au lieu de distribuer les memes privileges un par un a plusieurs utilisateurs,
+            on les met dans un role puis on attribue ce role.
+          </p>
+          <ul class="bullet-list">
+            <li>Creation d’un role et ajout de privileges.</li>
+            <li>Attribution du role aux utilisateurs.</li>
+            <li>Consultation des roles et des privileges associes via le dictionnaire.</li>
+            <li>Suppression du role si necessaire.</li>
+          </ul>
+        </article>
+
+        <aside class="panel">
+          <h2>Roles standards cites par le cours</h2>
+          <ul class="check-list">
+            <li><span class="mono">CONNECT</span></li>
+            <li><span class="mono">RESOURCE</span></li>
+            <li><span class="mono">DBA</span></li>
+          </ul>
+          <p class="muted">
+            Le cours les presente comme roles systeme standards a connaitre.
+          </p>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section" id="profils">
+      <div class="page-shell">
+        <article class="panel topic-block">
+          <h2>4. Gestion des profils et des mots de passe</h2>
+          <p>
+            Le profil est l’outil Oracle pour centraliser des limites relatives aux mots de passe
+            et a certaines ressources systeme. Le cours le rattache directement a l’augmentation
+            de la securite de la base.
+          </p>
+
+          <h3>Limites de mot de passe</h3>
+          <ul class="bullet-list">
+            <li><span class="mono">FAILED_LOGIN_ATTEMPTS</span>: nombre maximal d’essais de connexion echoues.</li>
+            <li><span class="mono">PASSWORD_LOCK_TIME</span>: duree de verrouillage apres echecs.</li>
+            <li><span class="mono">PASSWORD_LIFE_TIME</span>: duree de validite du mot de passe.</li>
+          </ul>
+
+          <h3>Limites de ressources</h3>
+          <ul class="bullet-list">
+            <li><span class="mono">SESSIONS_PER_USER</span>: nombre de sessions simultanees.</li>
+            <li><span class="mono">CONNECT_TIME</span> ou limites proches: temps de connexion autorise.</li>
+            <li><span class="mono">LOGICAL_READS_PER_SESSION</span>: volume de lectures logiques.</li>
+          </ul>
+
+          <h3>Demarche logique</h3>
+          <ol class="bullet-list">
+            <li>Creer le profil avec ses limites.</li>
+            <li>L’affecter aux utilisateurs.</li>
+            <li>Verifier les parametres via les vues du dictionnaire.</li>
+          </ol>
+        </article>
+
+        <div class="panel">
+          <h2>Resume flash</h2>
+          <p>
+            Dans ce chapitre, Oracle se comporte comme un environnement controle: les utilisateurs sont
+            identifies, les actions sont autorisees ou refusees par privileges, les droits peuvent etre
+            factorises par roles, et les politiques de securite sont durcies par profils.
+          </p>
+          <div class="button-row">
+            <a class="button-link secondary" href="tp-utilisateurs.html">Voir le resume TP de cette partie</a>
+            <a class="button-link" href="exercices-types.html#utilisateurs">Voir les exercices types</a>
+            <a class="button-link ghost" href="examens-similaires.html#utilisateurs">Voir les examens similaires</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="page-shell">
+      <div class="footer-card">Chapitre redige sans integrer les TPs. Le contenu ici vient du cours theorique.</div>
+    </div>
+  </footer>
+</body>
+</html>

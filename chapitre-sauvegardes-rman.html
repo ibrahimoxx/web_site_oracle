@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sauvegardes avec RMAN - Resume chapitre</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-mark">Partie 5</span>
+        <span class="brand-title">Sauvegardes avec RMAN</span>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html">Accueil</a>
+        <a href="tp-sauvegardes-rman.html">Resume TP</a>
+        <a href="exercices-types.html#backup-rman">Exercices types</a>
+        <a href="examens-similaires.html#backup-rman">Examens similaires</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-header">
+      <div class="page-shell">
+        <div class="page-header-card">
+          <span class="eyebrow">Cours seulement</span>
+          <h1>Strategie et types de sauvegardes avec RMAN</h1>
+          <p>
+            Ici, le cours passe de l’outil RMAN a la conception de vraies sauvegardes:
+            quoi sauvegarder, sous quelle forme, a quelle frequence et avec quelle strategie.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="page-shell grid grid-2">
+        <article class="panel topic-block">
+          <h2>1. Strategie de sauvegarde</h2>
+          <ul class="bullet-list">
+            <li>Une strategie doit couvrir le besoin metier en disponibilite et en reprise.</li>
+            <li>Elle depend du volume de stockage disponible, du type de base et du temps acceptable de restauration.</li>
+            <li>Elle peut viser toute la base (<span class="mono">whole</span>) ou seulement une partie (<span class="mono">partial</span>).</li>
+          </ul>
+        </article>
+
+        <article class="panel topic-block">
+          <h2>2. Types de backup</h2>
+          <ul class="bullet-list">
+            <li><strong>Full backup</strong>: tous les blocs utilises des fichiers vises.</li>
+            <li><strong>Incremental level 0</strong>: equivalent logique d’une base de reference complete.</li>
+            <li><strong>Incremental level 1 cumulative</strong>: changements depuis le dernier niveau 0.</li>
+            <li><strong>Incremental level 1 differentielle</strong>: changements depuis le dernier incremental precedent.</li>
+          </ul>
+        </article>
+
+        <article class="panel topic-block">
+          <h2>3. Modes et formes de sauvegarde</h2>
+          <ul class="bullet-list">
+            <li><strong>Offline</strong>: sauvegarde a froid, base arretee, donc coherente.</li>
+            <li><strong>Online</strong>: sauvegarde a chaud, base en service.</li>
+            <li><strong>Image copy</strong>: copie directe des fichiers, plus lourde en espace mais plus rapide a restaurer.</li>
+            <li><strong>Backup set</strong>: format binaire plus compact, mais necessite une reconstruction lors de la reprise.</li>
+            <li><strong>Proxy copy</strong>: appui sur un outil externe de sauvegarde.</li>
+          </ul>
+        </article>
+
+        <article class="panel topic-block">
+          <h2>4. Ce qui peut etre inclus</h2>
+          <ul class="bullet-list">
+            <li>Base complete.</li>
+            <li>PDB ou tablespace specifique.</li>
+            <li>Archived redo logs.</li>
+            <li>Control files et spfile.</li>
+          </ul>
+        </article>
+
+        <article class="panel topic-block">
+          <h2>5. Options de sauvegarde</h2>
+          <ul class="bullet-list">
+            <li><strong>Compression</strong>: moins d’espace, cout de traitement supplementaire.</li>
+            <li><strong>Cryptage</strong>: protection de la confidentialite des sauvegardes.</li>
+            <li><strong>Block change tracking</strong>: facilite les incrementaux en suivant les blocs modifies.</li>
+          </ul>
+        </article>
+
+        <article class="panel topic-block">
+          <h2>6. Choix d’une bonne strategie</h2>
+          <p>
+            Le cours insiste sur le fait qu’il n’existe pas une strategie unique optimale.
+            Il faut arbitrer entre rapidite de backup, rapidite de restore, espace consomme
+            et niveau de protection voulu.
+          </p>
+        </article>
+      </div>
+
+      <div class="page-shell">
+        <div class="panel">
+          <h2>Resume flash</h2>
+          <p>
+            Full, level 0, cumulative, differentielle, image copy et backup set sont des notions centrales.
+            L’examen peut demander la difference theorique, le bon cas d’usage ou le compromis espace/temps.
+          </p>
+          <div class="button-row">
+            <a class="button-link secondary" href="tp-sauvegardes-rman.html">Voir le resume TP associe</a>
+            <a class="button-link" href="exercices-types.html#backup-rman">Voir les exercices types</a>
+            <a class="button-link ghost" href="examens-similaires.html#backup-rman">Voir les examens similaires</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="page-shell">
+      <div class="footer-card">Resume theorique des sauvegardes RMAN, sans contenu TP.</div>
+    </div>
+  </footer>
+</body>
+</html>
