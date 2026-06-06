@@ -38,6 +38,7 @@
             <a href="#commandes">Commandes</a>
             <a href="#config">Configuration</a>
             <a href="#retention">Retention</a>
+            <a href="#syntaxe">Syntaxe</a>
           </div>
         </div>
       </div>
@@ -73,6 +74,10 @@
     <section class="section" id="connexion">
       <div class="page-shell">
         <article class="panel topic-block">
+          <div class="revision-banner">
+            <strong>Point fort revision:</strong>
+            ici il faut connaitre non seulement les notions RMAN, mais aussi la facon exacte de se connecter et de lire la configuration.
+          </div>
           <h2>2. Connexion a RMAN</h2>
           <ul class="bullet-list">
             <li>Le mot-cle <span class="mono">TARGET</span> designe la base cible de la sauvegarde ou de la recuperation.</li>
@@ -160,6 +165,48 @@
             <a class="button-link ghost" href="examens-similaires.html#rman-intro">Voir les examens similaires</a>
           </div>
         </div>
+      </div>
+    </section>
+
+    <section class="section" id="syntaxe">
+      <div class="page-shell">
+        <article class="panel topic-block">
+          <div class="study-label">Revision syntaxe</div>
+          <h2>6. Commandes du cours a memoriser</h2>
+          <div class="command-grid">
+            <div class="command-card">
+              <h3>Connexion a RMAN</h3>
+              <p>Le support donne des exemples directs de connexion a la base cible.</p>
+              <pre class="syntax-block">rman target sys/password@mydb
+rman target sys/pass@localhost:1522/orclpdb
+CONNECT TARGET user/pass@mydb</pre>
+            </div>
+            <div class="command-card">
+              <h3>SQL depuis RMAN</h3>
+              <p>Le cours dit explicitement qu'on peut lancer des requetes SQL depuis RMAN.</p>
+              <pre class="syntax-block">SQL SELECT name, dbid, log_mode FROM v$database;
+SELECT name, dbid, log_mode FROM v$database;</pre>
+            </div>
+            <div class="command-card">
+              <h3>Configuration persistante</h3>
+              <p>Les commandes de base pour lire et changer les parametres.</p>
+              <pre class="syntax-block">SHOW ALL;
+SHOW RETENTION POLICY;
+SHOW CONTROLFILE AUTOBACKUP;
+
+SELECT * FROM V$RMAN_CONFIGURATION;</pre>
+            </div>
+            <div class="command-card">
+              <h3>CONFIGURE et CLEAR</h3>
+              <p>Le cours explique que la modification tient en une ligne de commande.</p>
+              <pre class="syntax-block">CONFIGURE BACKUP OPTIMIZATION ON;
+CONFIGURE BACKUP OPTIMIZATION CLEAR;
+
+CONFIGURE RETENTION POLICY TO RECOVERY WINDOW OF 7 DAYS;
+CONFIGURE RETENTION POLICY TO REDUNDANCY 2;</pre>
+            </div>
+          </div>
+        </article>
       </div>
     </section>
   </main>

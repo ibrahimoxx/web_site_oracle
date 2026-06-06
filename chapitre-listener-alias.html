@@ -31,11 +31,17 @@
             Cette partie explique comment une connexion reseau Oracle atteint l’instance:
             le client utilise un alias TNS, le listener ecoute sur un port, puis redirige vers la base cible.
           </p>
+          <div class="page-anchor-nav">
+            <a href="#listener">Listener</a>
+            <a href="#fichiers">Fichiers</a>
+            <a href="#lsnrctl">LSNRCTL</a>
+            <a href="#commandes">Commandes</a>
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="section">
+    <section class="section" id="listener">
       <div class="page-shell grid grid-2">
         <article class="panel topic-block">
           <h2>1. Qu’est-ce qu’un listener</h2>
@@ -47,7 +53,7 @@
           </ul>
         </article>
 
-        <article class="panel topic-block">
+        <article class="panel topic-block" id="fichiers">
           <h2>2. Fichiers de configuration</h2>
           <ul class="bullet-list">
             <li><span class="mono">listener.ora</span>: configuration du listener cote serveur.</li>
@@ -84,7 +90,7 @@
           </ol>
         </article>
 
-        <article class="panel topic-block">
+        <article class="panel topic-block" id="lsnrctl">
           <h2>6. Commandes LSNRCTL a connaitre</h2>
           <ul class="bullet-list">
             <li><span class="mono">lsnrctl start</span></li>
@@ -93,6 +99,65 @@
             <li><span class="mono">lsnrctl reload</span></li>
             <li><span class="mono">lsnrctl services</span></li>
           </ul>
+        </article>
+      </div>
+
+      <div class="page-shell" id="commandes">
+        <article class="panel topic-block">
+          <div class="study-label">Revision syntaxe</div>
+          <div class="revision-banner">
+            <strong>Point fort revision:</strong>
+            cette partie est courte, donc les syntaxes de <span class="mono">listener.ora</span>, de l'alias TNS et de <span class="mono">lsnrctl</span> doivent etre retenues presque mot pour mot.
+          </div>
+          <h2>7. Commandes et blocs du cours a memoriser</h2>
+          <div class="command-grid">
+            <div class="command-card">
+              <h3>Exemple listener.ora</h3>
+              <pre class="syntax-block">LISTENER =
+  (DESCRIPTION_LIST =
+    (DESCRIPTION =
+      (ADDRESS = (PROTOCOL = TCP)
+                 (HOST = serveur.domain.com)
+                 (PORT = 1521))
+    )
+  )
+
+SID_LIST_LISTENER =
+  (SID_LIST =
+    (SID_DESC =
+      (GLOBAL_DBNAME = ORCL)
+      (ORACLE_HOME = /u01/app/oracle/product/19c)
+      (SID_NAME = ORCL)
+    )
+  )</pre>
+            </div>
+            <div class="command-card">
+              <h3>Commandes LSNRCTL</h3>
+              <pre class="syntax-block">lsnrctl start
+lsnrctl stop
+lsnrctl status
+lsnrctl reload
+lsnrctl services
+lsnrctl help</pre>
+            </div>
+            <div class="command-card">
+              <h3>Exemple tnsnames.ora</h3>
+              <pre class="syntax-block">ORCL_PROD =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)
+               (HOST = prod-server.domain.com)
+               (PORT = 1521))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SERVICE_NAME = ORCL)
+    )
+  )</pre>
+            </div>
+            <div class="command-card">
+              <h3>Utilisation cote client</h3>
+              <pre class="syntax-block">sqlplus user/password@ORCL_PROD</pre>
+            </div>
+          </div>
         </article>
       </div>
 

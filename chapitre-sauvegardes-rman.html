@@ -32,11 +32,17 @@
             Ici, le cours passe de l’outil RMAN a la conception de vraies sauvegardes:
             quoi sauvegarder, sous quelle forme, a quelle frequence et avec quelle strategie.
           </p>
+          <div class="page-anchor-nav">
+            <a href="#strategie">Strategie</a>
+            <a href="#types">Types</a>
+            <a href="#options">Options</a>
+            <a href="#commandes">Commandes</a>
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="section">
+    <section class="section" id="strategie">
       <div class="page-shell grid grid-2">
         <article class="panel topic-block">
           <h2>1. Strategie de sauvegarde</h2>
@@ -47,7 +53,7 @@
           </ul>
         </article>
 
-        <article class="panel topic-block">
+        <article class="panel topic-block" id="types">
           <h2>2. Types de backup</h2>
           <ul class="bullet-list">
             <li><strong>Full backup</strong>: tous les blocs utilises des fichiers vises.</li>
@@ -78,7 +84,7 @@
           </ul>
         </article>
 
-        <article class="panel topic-block">
+        <article class="panel topic-block" id="options">
           <h2>5. Options de sauvegarde</h2>
           <ul class="bullet-list">
             <li><strong>Compression</strong>: moins d’espace, cout de traitement supplementaire.</li>
@@ -94,6 +100,64 @@
             Il faut arbitrer entre rapidite de backup, rapidite de restore, espace consomme
             et niveau de protection voulu.
           </p>
+        </article>
+      </div>
+
+      <div class="page-shell" id="commandes">
+        <article class="panel topic-block">
+          <div class="study-label">Revision syntaxe</div>
+          <div class="revision-banner">
+            <strong>Point fort revision:</strong>
+            ce chapitre tombe souvent en mode "donner la commande de backup", donc la syntaxe doit etre visible et facile a relire.
+          </div>
+          <h2>7. Commandes du cours a memoriser</h2>
+          <div class="command-grid">
+            <div class="command-card">
+              <h3>Structure et sauvegardes globales</h3>
+              <p>Ce sont les commandes les plus directement rattachees au support.</p>
+              <pre class="syntax-block">REPORT SCHEMA;
+BACKUP DATABASE;
+BACKUP DATABASE PLUS ARCHIVELOG;
+BACKUP DATABASE SKIP READONLY;</pre>
+            </div>
+            <div class="command-card">
+              <h3>CDB, PDB et tablespace</h3>
+              <p>Le cours insiste sur la sauvegarde totale ou partielle.</p>
+              <pre class="syntax-block">BACKUP PLUGGABLE DATABASE nom_pdb;
+BACKUP TABLESPACE users;
+BACKUP TABLESPACE nom_pdb:users;</pre>
+            </div>
+            <div class="command-card">
+              <h3>Incremental</h3>
+              <p>Le support parle explicitement du niveau 0 et du tag d'incremental.</p>
+              <pre class="syntax-block">BACKUP INCREMENTAL LEVEL 0 DATABASE;
+BACKUP INCREMENTAL LEVEL 1 TAG 'daily_inc' DATABASE;</pre>
+            </div>
+            <div class="command-card">
+              <h3>Image copy et backup set</h3>
+              <p>Deux formes de sauvegarde a savoir reconnaitre.</p>
+              <pre class="syntax-block">BACKUP AS COPY DATAFILE '/chemin/datafile.dbf';
+BACKUP AS COPY ARCHIVELOG LIKE 'arch%';
+BACKUP AS BACKUPSET TABLESPACE users;</pre>
+            </div>
+            <div class="command-card">
+              <h3>Control file, compression et chiffrement</h3>
+              <p>Le cours associe ces options a la strategie de protection.</p>
+              <pre class="syntax-block">CONFIGURE CONTROLFILE AUTOBACKUP ON;
+BACKUP AS COMPRESSED BACKUPSET DATABASE;
+SET ENCRYPTION ON IDENTIFIED BY 'motdepasse' ONLY;</pre>
+            </div>
+            <div class="command-card">
+              <h3>Lecture d'examen</h3>
+              <p>Pour ce chapitre, sais relier chaque commande a son but.</p>
+              <ul class="signal-list">
+                <li><span class="note-chip">REPORT SCHEMA</span> pour voir datafiles et tablespaces.</li>
+                <li><span class="note-chip">BACKUP AS COPY</span> pour image copy.</li>
+                <li><span class="note-chip">BACKUP AS BACKUPSET</span> pour ensemble compresse/logique.</li>
+                <li><span class="note-chip">LEVEL 0 / LEVEL 1</span> pour incremental.</li>
+              </ul>
+            </div>
+          </div>
         </article>
       </div>
 

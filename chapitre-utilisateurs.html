@@ -39,6 +39,7 @@
             <a href="#privileges">Privileges</a>
             <a href="#roles">Roles</a>
             <a href="#profils">Profils</a>
+            <a href="#commandes">Commandes</a>
           </div>
         </div>
       </div>
@@ -47,6 +48,7 @@
     <section class="section" id="idee-cle">
       <div class="page-shell columns">
         <article class="panel topic-block">
+          <div class="study-label">Point fort</div>
           <h2>Idee cle du chapitre</h2>
           <p>
             Oracle etant un SGBD multiutilisateur, la securite ne se limite pas a bloquer l’acces.
@@ -76,6 +78,10 @@
     <section class="section" id="utilisateurs">
       <div class="page-shell">
         <article class="panel topic-block">
+          <div class="revision-banner">
+            <strong>Point fort revision:</strong>
+            dans ce chapitre, l'examen aime les syntaxes exactes de creation, d'attribution des droits et de creation de profil.
+          </div>
           <h2>1. Gestion des utilisateurs</h2>
           <h3>Ce qu’on decide lors de la creation</h3>
           <ul class="bullet-list">
@@ -213,6 +219,107 @@
             <li>L’affecter aux utilisateurs.</li>
             <li>Verifier les parametres via les vues du dictionnaire.</li>
           </ol>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="commandes">
+      <div class="page-shell">
+        <article class="panel topic-block">
+          <div class="study-label">Revision syntaxe</div>
+          <h2>5. Commandes du cours a memoriser</h2>
+          <div class="command-grid">
+            <div class="command-card">
+              <h3>Creation et authentification</h3>
+              <p>Le cours donne la syntaxe de base pour creer un utilisateur Oracle.</p>
+              <pre class="syntax-block">CREATE USER user
+IDENTIFIED { BY password | EXTERNALLY }
+[DEFAULT TABLESPACE tablespace]
+[TEMPORARY TABLESPACE tablespace]
+[QUOTA { integer [K|M] | UNLIMITED } ON tablespace]
+[PASSWORD EXPIRE]
+[ACCOUNT { LOCK | UNLOCK }];</pre>
+            </div>
+            <div class="command-card">
+              <h3>Modification et suppression</h3>
+              <p>Ces variantes apparaissent explicitement dans le support.</p>
+              <pre class="syntax-block">ALTER USER scott IDENTIFIED BY nouveau_motdepasse;
+ALTER USER user QUOTA 15M ON tablespace1 QUOTA 5M ON tablespace2;
+ALTER USER scott DEFAULT TABLESPACE tablespace2 TEMPORARY TABLESPACE tmp_tablespace2;
+ALTER USER user ACCOUNT LOCK;
+DROP USER test;
+DROP USER test CASCADE;</pre>
+            </div>
+            <div class="command-card">
+              <h3>Vues de controle utilisateur</h3>
+              <p>Le cours cite directement les vues de dictionnaire a interroger.</p>
+              <pre class="syntax-block">SELECT * FROM DBA_USERS
+WHERE username = 'NOM_UTILISATEUR';
+
+SELECT TABLESPACE_NAME, USERNAME, BYTES, MAX_BYTES
+FROM DBA_TS_QUOTAS
+WHERE USERNAME = 'NOM_UTILISATEUR'
+  AND TABLESPACE_NAME = 'NOM_TABLESPACE';</pre>
+            </div>
+            <div class="command-card">
+              <h3>Privileges systeme et objet</h3>
+              <p>Ce sont les syntaxes d'attribution et de revocation du cours.</p>
+              <pre class="syntax-block">GRANT CREATE SESSION TO nom_utilisateur;
+GRANT CREATE TABLE TO nom_utilisateur;
+GRANT CREATE VIEW TO nom_utilisateur;
+
+GRANT SELECT, INSERT, UPDATE, DELETE
+ON SYS.client TO nom_utilisateur;
+
+GRANT UPDATE (nom, prenom)
+ON SYS.client TO nom_utilisateur;
+
+REVOKE CREATE SESSION FROM nom_utilisateur;
+REVOKE SELECT ON SYS.client FROM nom_utilisateur;
+REVOKE INSERT, UPDATE, DELETE
+ON SYS.client FROM nom_utilisateur;</pre>
+            </div>
+            <div class="command-card">
+              <h3>Roles</h3>
+              <p>Le support montre la creation d'un role, son remplissage et les vues utiles.</p>
+              <pre class="syntax-block">CREATE ROLE compta;
+GRANT SELECT, INSERT, UPDATE, DELETE ON client TO compta;
+GRANT SELECT, INSERT, UPDATE ON fournisseur TO compta;
+GRANT compta TO nom_utilisateur;
+
+SELECT * FROM DBA_SYS_PRIVS WHERE grantee = 'CONNECT';
+SELECT * FROM DBA_ROLE_PRIVS WHERE grantee = 'USER';
+SELECT * FROM DBA_TAB_PRIVS WHERE grantee = 'USER';
+SELECT * FROM SESSION_ROLES;
+SELECT * FROM SESSION_PRIVS;
+DROP ROLE nom_role;</pre>
+            </div>
+            <div class="command-card">
+              <h3>Profils et mots de passe</h3>
+              <p>Le cours ne se limite pas aux concepts, il donne aussi la syntaxe de profil.</p>
+              <pre class="syntax-block">ALTER USER user PROFILE profile_user;
+
+CREATE PROFILE app_user LIMIT
+  FAILED_LOGIN_ATTEMPTS 3
+  PASSWORD_LOCK_TIME 10
+  SESSIONS_PER_USER UNLIMITED
+  CONNECT_TIME 45
+  LOGICAL_READS_PER_SESSION DEFAULT
+  PRIVATE_SGA 15M;
+
+SELECT profile, resource_name, limit
+FROM DBA_PROFILES;
+
+SELECT username, profile
+FROM DBA_USERS
+WHERE username = 'NOM_UTILISATEUR';</pre>
+            </div>
+          </div>
+
+          <div class="revision-banner">
+            <strong>Point fort revision:</strong>
+            memorise aussi le script <span class="mono">utlpwdmg.sql</span> cite par le cours pour activer la gestion des mots de passe.
+          </div>
         </article>
 
         <div class="panel">

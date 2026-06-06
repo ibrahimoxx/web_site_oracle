@@ -31,11 +31,17 @@
             Cette partie du cours explique quand RMAN peut se contenter du control file et quand il devient
             preferable d’ajouter un catalogue de recuperation externe.
           </p>
+          <div class="page-anchor-nav">
+            <a href="#concepts">Concepts</a>
+            <a href="#creation">Creation</a>
+            <a href="#gestion">Gestion</a>
+            <a href="#commandes">Commandes</a>
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="section">
+    <section class="section" id="concepts">
       <div class="page-shell grid grid-2">
         <article class="panel topic-block">
           <h2>1. Definition</h2>
@@ -88,7 +94,7 @@
           </div>
         </article>
 
-        <article class="panel topic-block">
+        <article class="panel topic-block" id="creation">
           <h2>4. Creation logique</h2>
           <ol class="bullet-list">
             <li>Preparer la base qui accueillera le catalogue.</li>
@@ -98,6 +104,60 @@
           <p class="muted">
             Le cours souligne qu’il faut aussi dimensionner l’espace selon le nombre de bases et de sauvegardes suivies.
           </p>
+        </article>
+      </div>
+
+      <div class="page-shell" id="gestion">
+        <div class="panel topic-block">
+          <div class="revision-banner">
+            <strong>Point fort revision:</strong>
+            pour ce chapitre, l'examen demande souvent a quoi sert le catalog et quelles sont les operations de gestion autour de lui.
+          </div>
+          <h2>5. Gestion logique du catalog</h2>
+          <ul class="bullet-list">
+            <li>Enregistrer une base cible dans le catalog.</li>
+            <li>Retirer une base cible du catalog.</li>
+            <li>Resynchroniser les metadonnees entre control file et catalog.</li>
+            <li>Cataloguer des fichiers de sauvegarde additionnels.</li>
+            <li>Dans le cas du VPC, ajouter ou retirer l'acces avec des commandes de type GRANT et REVOKE.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="page-shell" id="commandes">
+        <article class="panel topic-block">
+          <div class="study-label">Revision syntaxe</div>
+          <h2>6. Commandes du cours a memoriser</h2>
+          <div class="command-grid">
+            <div class="command-card">
+              <h3>Preparation du proprietaire</h3>
+              <p>Le support impose un owner avec un tablespace dedie et le privilege du catalog.</p>
+              <pre class="syntax-block">CREATE USER rman IDENTIFIED BY motdepasse
+DEFAULT TABLESPACE rman_cat_ts
+QUOTA UNLIMITED ON rman_cat_ts;
+
+GRANT RECOVERY_CATALOG_OWNER TO rman;</pre>
+            </div>
+            <div class="command-card">
+              <h3>Creation du catalog</h3>
+              <p>Commande explicitement citee dans le support.</p>
+              <pre class="syntax-block">CREATE CATALOG;</pre>
+            </div>
+            <div class="command-card">
+              <h3>Gestion courante</h3>
+              <p>Le cours cite ces operations de gestion autour du recovery catalog.</p>
+              <pre class="syntax-block">REGISTER DATABASE;
+UNREGISTER DATABASE;
+RESYNC CATALOG;</pre>
+            </div>
+            <div class="command-card">
+              <h3>VPC et suppression</h3>
+              <p>Le support mentionne GRANT/REVOKE pour VPC et la suppression avec DROP CATALOG.</p>
+              <pre class="syntax-block">GRANT ... TO vpc_owner;
+REVOKE ... FROM vpc_owner;
+DROP CATALOG;</pre>
+            </div>
+          </div>
         </article>
       </div>
 

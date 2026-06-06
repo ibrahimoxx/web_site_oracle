@@ -455,6 +455,110 @@ img {
   border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
 }
 
+.study-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(249, 178, 51, 0.18);
+  color: #7a4d00;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.revision-banner {
+  padding: 18px 20px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(90deg, rgba(249, 178, 51, 0.16), rgba(166, 75, 42, 0.08));
+  border: 1px solid rgba(166, 75, 42, 0.16);
+  margin-bottom: 18px;
+}
+
+.revision-banner strong {
+  color: var(--accent-strong);
+}
+
+.focus-grid,
+.command-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.focus-card {
+  padding: 18px;
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid var(--line);
+  box-shadow: 0 12px 30px rgba(41, 37, 32, 0.08);
+}
+
+.focus-card strong {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--secondary);
+}
+
+.command-card {
+  padding: 18px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, rgba(24, 33, 48, 0.96), rgba(16, 24, 36, 0.96));
+  color: #eef3f7;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 16px 40px rgba(20, 25, 33, 0.18);
+}
+
+.command-card h3 {
+  margin: 0 0 10px;
+  font-size: 1rem;
+  font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+  color: #fff7dd;
+}
+
+.command-card p {
+  margin: 0 0 12px;
+  color: rgba(238, 243, 247, 0.82);
+  font-size: 0.94rem;
+}
+
+.syntax-block {
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fdf7db;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+.signal-list {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.signal-list li {
+  margin-bottom: 8px;
+}
+
+.note-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(14, 90, 100, 0.12);
+  color: var(--secondary);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
 .footer {
   padding: 36px 0 60px;
   color: var(--muted);
@@ -572,7 +676,9 @@ th {
   .columns,
   .grid-2,
   .grid-3,
-  .key-grid {
+  .key-grid,
+  .focus-grid,
+  .command-grid {
     grid-template-columns: 1fr;
   }
 

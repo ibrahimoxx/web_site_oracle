@@ -33,11 +33,17 @@
             fichiers critiques perdus, recuperation complete ou incomplete, control file de sauvegarde
             et spfile a restaurer.
           </p>
+          <div class="page-anchor-nav">
+            <a href="#principes">Principes</a>
+            <a href="#complete">Complete</a>
+            <a href="#incomplete">Incomplete</a>
+            <a href="#commandes">Commandes</a>
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="section">
+    <section class="section" id="principes">
       <div class="page-shell grid grid-2">
         <article class="panel topic-block">
           <h2>1. Principe general</h2>
@@ -48,7 +54,7 @@
           </ul>
         </article>
 
-        <article class="panel topic-block">
+        <article class="panel topic-block" id="complete">
           <h2>2. Recuperation complete</h2>
           <p>
             L’objectif est de revenir a l’etat le plus a jour possible de la base
@@ -60,7 +66,7 @@
           </ul>
         </article>
 
-        <article class="panel topic-block">
+        <article class="panel topic-block" id="incomplete">
           <h2>3. Recuperation incomplete</h2>
           <p>
             On vise un point precis dans le temps, un SCN ou un moment donne. Elle sert quand on ne veut
@@ -95,6 +101,53 @@
             Le cours montre que RMAN peut aider a restaurer le spfile, meme dans un contexte ou l’instance
             ne demarre pas normalement, en s’appuyant sur des sauvegardes automatiques et parfois sur le DBID.
           </p>
+        </article>
+      </div>
+
+      <div class="page-shell" id="commandes">
+        <article class="panel topic-block">
+          <div class="study-label">Revision syntaxe</div>
+          <div class="revision-banner">
+            <strong>Point fort revision:</strong>
+            ici, la difference entre complete et incomplete doit etre comprise et vue en commandes.
+          </div>
+          <h2>7. Commandes du cours a memoriser</h2>
+          <div class="command-grid">
+            <div class="command-card">
+              <h3>Recuperation complete d'un datafile critique</h3>
+              <p>Le support donne ce scenario explicitement pour le tablespace SYSTEM.</p>
+              <pre class="syntax-block">RMAN TARGET '/ AS SYSBACKUP'
+SHUTDOWN ABORT
+STARTUP FORCE MOUNT
+RESTORE TABLESPACE SYSTEM;
+RECOVER TABLESPACE SYSTEM;
+ALTER DATABASE OPEN;</pre>
+            </div>
+            <div class="command-card">
+              <h3>Recuperation incomplete</h3>
+              <p>Le cours fournit un bloc <span class="mono">RUN</span> avec <span class="mono">SET UNTIL TIME</span>.</p>
+              <pre class="syntax-block">RUN {
+  STARTUP MOUNT;
+  SET UNTIL TIME = TO_DATE('05-05-24 02:48:36', 'dd-mm-yy hh24:mi:ss');
+  RESTORE DATABASE;
+  RECOVER DATABASE;
+  ALTER DATABASE OPEN RESETLOGS;
+}</pre>
+            </div>
+            <div class="command-card">
+              <h3>Control file de sauvegarde</h3>
+              <p>Le support dit de restaurer le control file, lancer recover puis ouvrir en RESETLOGS.</p>
+              <pre class="syntax-block">RESTORE CONTROLFILE FROM AUTOBACKUP;
+RECOVER DATABASE;
+ALTER DATABASE OPEN RESETLOGS;</pre>
+            </div>
+            <div class="command-card">
+              <h3>Spfile depuis autobackup</h3>
+              <p>Le cours consacre aussi une slide a cette restauration.</p>
+              <pre class="syntax-block">RESTORE SPFILE FROM AUTOBACKUP;
+STARTUP FORCE;</pre>
+            </div>
+          </div>
         </article>
       </div>
 

@@ -39,6 +39,7 @@
             <a href="#restore-recover">Restore vs recover</a>
             <a href="#instance">Instance recovery</a>
             <a href="#config">Configuration</a>
+            <a href="#commandes">Commandes</a>
           </div>
         </div>
       </div>
@@ -166,6 +167,7 @@
     <section class="section" id="config">
       <div class="page-shell">
         <article class="panel topic-block">
+          <div class="study-label">Point fort</div>
           <h2>5. Configuration de la sauvegarde et de la recuperation</h2>
           <ul class="bullet-list">
             <li>Planifier des sauvegardes regulieres.</li>
@@ -201,6 +203,34 @@
             <a class="button-link ghost" href="examens-similaires.html#backup">Voir les examens similaires</a>
           </div>
         </div>
+      </div>
+    </section>
+
+    <section class="section" id="commandes">
+      <div class="page-shell">
+        <article class="panel topic-block">
+          <div class="study-label">Revision syntaxe</div>
+          <h2>6. Commandes du cours a memoriser</h2>
+          <div class="command-grid">
+            <div class="command-card">
+              <h3>Configuration de la FRA</h3>
+              <p>Ces syntaxes apparaissent dans la partie Fast Recovery Area du cours.</p>
+              <pre class="syntax-block">SQL&gt; ALTER SYSTEM SET db_recovery_file_dest = directory | disk group;
+SQL&gt; ALTER SYSTEM SET db_recovery_file_dest_size = integer [K|M|G];</pre>
+            </div>
+            <div class="command-card">
+              <h3>Vues a consulter</h3>
+              <p>Le support cite ces deux vues comme vues de controle de la zone de recovery.</p>
+              <pre class="syntax-block">SELECT * FROM V$RECOVERY_FILE_DEST;
+SELECT * FROM V$RECOVERY_AREA_USAGE;</pre>
+            </div>
+          </div>
+
+          <div class="revision-banner">
+            <strong>Point fort revision:</strong>
+            ce chapitre contient peu de commandes, mais elles sont tres tombables a l'ecrit parce qu'elles sont simples et directement liees a la FRA.
+          </div>
+        </article>
       </div>
     </section>
   </main>

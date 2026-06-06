@@ -266,6 +266,53 @@
           pense toujours en chaine logique: securiser l’acces a la base, proteger les fichiers critiques, sauvegarder regulierement,
           puis savoir restaurer et recuperer selon le type de panne.
         </div>
+
+        <div class="revision-banner">
+          <strong>Point fort revision:</strong>
+          les questions d'examen tournent souvent autour des differences, des utilites et des commandes a reconnaitre.
+          Pour chaque chapitre, pense "definition + difference + syntaxe cle".
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="page-shell">
+        <div class="section-header">
+          <div>
+            <div class="section-kicker">Carte des commandes</div>
+            <h2 class="section-title">Commandes a retrouver par chapitre</h2>
+          </div>
+          <p class="section-note">
+            Ce tableau n'entre pas dans tous les details. Il sert a savoir ou reviser la syntaxe theorique dans le site.
+          </p>
+        </div>
+
+        <div class="focus-grid">
+          <div class="focus-card">
+            <strong>Chapitre 1</strong>
+            <p><span class="mono">CREATE USER</span>, <span class="mono">ALTER USER</span>, <span class="mono">DROP USER</span>, <span class="mono">GRANT</span>, <span class="mono">REVOKE</span>, <span class="mono">CREATE ROLE</span>, <span class="mono">CREATE PROFILE</span>.</p>
+          </div>
+          <div class="focus-card">
+            <strong>Chapitre 2</strong>
+            <p><span class="mono">ALTER SYSTEM SET DB_RECOVERY_FILE_DEST...</span>, consultation de <span class="mono">V$RECOVERY_FILE_DEST</span> et <span class="mono">V$RECOVERY_AREA_USAGE</span>.</p>
+          </div>
+          <div class="focus-card">
+            <strong>RMAN Intro</strong>
+            <p><span class="mono">rman target ...</span>, <span class="mono">CONNECT TARGET</span>, <span class="mono">SQL SELECT ...</span>, <span class="mono">SHOW ALL</span>, <span class="mono">CONFIGURE</span>.</p>
+          </div>
+          <div class="focus-card">
+            <strong>Recovery Catalog</strong>
+            <p><span class="mono">CREATE CATALOG</span>, <span class="mono">REGISTER DATABASE</span>, <span class="mono">RESYNC CATALOG</span>, <span class="mono">DROP CATALOG</span>.</p>
+          </div>
+          <div class="focus-card">
+            <strong>Sauvegardes RMAN</strong>
+            <p><span class="mono">REPORT SCHEMA</span>, <span class="mono">BACKUP DATABASE</span>, <span class="mono">BACKUP PLUGGABLE DATABASE</span>, <span class="mono">BACKUP AS COPY</span>, <span class="mono">BACKUP AS BACKUPSET</span>.</p>
+          </div>
+          <div class="focus-card">
+            <strong>Recovery RMAN et reseau</strong>
+            <p><span class="mono">RESTORE</span>, <span class="mono">RECOVER</span>, <span class="mono">RUN { SET UNTIL ... }</span>, <span class="mono">lsnrctl status</span>, <span class="mono">sqlplus user/password@alias</span>.</p>
+          </div>
+        </div>
       </div>
     </section>
 
