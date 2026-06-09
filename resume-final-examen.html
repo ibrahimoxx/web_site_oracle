@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resume Final Examen — Oracle DBA2</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-mark">Examen Oracle</span>
+        <span class="brand-title">Resume Final — 3 Exercices</span>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html">Accueil</a>
+        <a href="#ex1">Ex.1 Securite</a>
+        <a href="#ex2">Ex.2 RMAN</a>
+        <a href="#ex3">Ex.3 Flashback</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-header">
+      <div class="page-shell">
+        <div class="page-header-card">
+          <span class="eyebrow">Structure 100% examen • Resume cours complet</span>
+          <h1>Resume Final Oracle DBA2 — 3 Exercices</h1>
+          <p>Ce resume suit exactement la structure de l'examen. Chaque notion est expliquee: comment ca fonctionne, quand ca ne fonctionne pas, et ce qu'il faut faire pour que ca marche.</p>
+          <div class="page-anchor-nav">
+            <a href="#ex1">Exercice 1 — Utilisateurs, Privileges, Roles, Profils</a>
+            <a href="#ex2">Exercice 2 — RMAN</a>
+            <a href="#ex3">Exercice 3 — Flashback</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!-- EXERCICE 1 : SECURITE ORACLE                   -->
+    <!-- ══════════════════════════════════════════════ -->
+    <section class="section" id="ex1">
+      <div class="page-shell">
+        <div class="section-header">
+          <div>
+            <div class="section-kicker">Exercice 1</div>
+            <h2 class="section-title">Gestion des utilisateurs, privileges, roles et profils</h2>
+          </div>
+          <p class="section-note">Securite logique Oracle: qui peut se connecter, ce qu'il peut faire, dans quel espace, et quelles limites s'appliquent.</p>
+        </div>
+
+        <article class="panel topic-block">
+          <h2>1. Utilisateurs</h2>
+          <div class="callout">
+            <strong>Comment ca marche:</strong> Un utilisateur Oracle est une identite + un schema (espace d'objets).
+            Oracle verifie l'identifiant et le mot de passe avant d'ouvrir la session.
+            Sans le privilege <span class="mono">CREATE SESSION</span>, l'utilisateur ne peut pas se connecter meme si le compte existe.
+            Sans quota sur un tablespace, il ne peut pas creer d'objets permanents dans ce tablespace.
+            L'authentification peut etre geree par Oracle (IDENTIFIED BY) ou par l'OS (IDENTIFIED EXTERNALLY).
+          </div>
+
+          <span class="code-label">CREATE USER — creation complete</span>
+          <pre class="code-block"><code>CREATE USER app_user IDENTIFIED BY mon_password
+  DEFAULT TABLESPACE users
+  TEMPORARY TABLESPACE temp
+  QUOTA 50M ON users
+  ACCOUNT UNLOCK;
+
+-- Puis accorder le droit de connexion (OBLIGATOIRE)
+GRANT CREATE SESSION TO app_user;
+
+-- Authentification par l'OS (pas de mot de passe Oracle)
+CREATE USER user_os IDENTIFIED EXTERNALLY;</code></pre>
+
+          <span class="code-label">ALTER USER — toutes les modifications</span>
+          <pre class="code-block"><code>ALTER USER app_user IDENTIFIED BY nouveau_password;   -- Changer mot de passe
+ALTER USER app_user ACCOUNT LOCK;                     -- Verrouiller
+ALTER USER app_user ACCOUNT UNLOCK;                   -- Deverrouiller
+ALTER USER app_user PASSWORD EXPIRE;                  -- Forcer changement
+ALTER USER app_user QUOTA 100M ON users;              -- Modifier quota
+ALTER USER app_user QUOTA UNLIMITED ON users;         -- Quota illimite
+ALTER USER app_user QUOTA 0 ON users;                 -- Supprimer quota
+ALTER USER app_user DEFAULT TABLESPACE data_tbs;      -- Changer tablespace
+ALTER USER app_user PROFILE profil_app;               -- Affecter un profil</code></pre>
+
+          <span class="code-label">DROP USER</span>
+          <pre class="code-block"><code>DROP USER app_user;           -- Echoue si l'utilisateur possede des objets
+DROP USER app_user CASCADE;   -- Supprime l'utilisateur ET tout son schema</code></pre>
+
+          <div class="callout danger">
+            <strong>Quand ca ne marche pas:</strong>
+            <ul class="bullet-list" style="margin-top:8px">
+              <li><span class="mono">ORA-01045</span> — connexion refusee: CREATE SESSION manquant → <span class="mono">GRANT CREATE SESSION TO user</span></li>
+              <li><span class="mono">ORA-01536</span> — quota depasse sur tablespace → <span class="mono">ALTER USER ... QUOTA UNLIMITED ON tbs</span></li>
+              <li><span class="mono">ORA-28000</span> — compte verrouille (trop d'echecs) → <span class="mono">ALTER USER ... ACCOUNT UNLOCK</span></li>
+              <li><span class="mono">ORA-28001</span> — mot de passe expire → <span class="mono">ALTER USER ... IDENTIFIED BY nouveau_mdp</span></li>
+              <li>DROP refuse — schema non vide → ajouter <span class="mono">CASCADE</span></li>
+            </ul>
+          </div>
+
+          <span class="code-label">Vues de verification</span>
+          <pre class="code-block"><code>SELECT username, account_status, default_tablespace, profile FROM dba_users;
+SELECT username, tablespace_name, bytes, max_bytes FROM dba_ts_quotas WHERE username = 'APP_USER';</code></pre>
+        </article>
+
+        <article class="panel topic-block" style="margin-top:18px">
+          <h2>2. Privileges</h2>
+          <div class="callout">
+            <strong>Comment ca marche:</strong> Deux types totalement differents:
+            <strong>Privilege systeme</strong> = autorise une action generale sur la base (creer une table dans n'importe quel schema).
+            <strong>Privilege objet</strong> = autorise une action sur un objet precis d'un autre schema (SELECT sur la table EMP de SCOTT).
+            On donne avec GRANT, on retire avec REVOKE.
+            Pour transmettre un privilege systeme → <span class="mono">WITH ADMIN OPTION</span>.
+            Pour transmettre un privilege objet → <span class="mono">WITH GRANT OPTION</span>.
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Type</th><th>Portee</th><th>Option de transmission</th><th>Exemples</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td>Privilege systeme</td>
+                  <td>Action globale sur la base</td>
+                  <td><span class="mono">WITH ADMIN OPTION</span></td>
+                  <td><span class="mono">CREATE SESSION</span>, <span class="mono">CREATE TABLE</span>, <span class="mono">ALTER SYSTEM</span></td>
+                </tr>
+                <tr>
+                  <td>Privilege objet</td>
+                  <td>Action sur un objet precis</td>
+                  <td><span class="mono">WITH GRANT OPTION</span></td>
+                  <td><span class="mono">SELECT ON scott.emp</span>, <span class="mono">EXECUTE ON proc</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <span class="code-label">GRANT — privileges systeme</span>
+          <pre class="code-block"><code>GRANT CREATE SESSION TO app_user;
+GRANT CREATE TABLE TO app_user;
+GRANT CREATE VIEW, CREATE SEQUENCE, CREATE PROCEDURE TO app_user;
+GRANT UNLIMITED TABLESPACE TO app_user;
+-- Avec droit de transmettre le privilege
+GRANT CREATE TABLE TO app_user WITH ADMIN OPTION;</code></pre>
+
+          <span class="code-label">GRANT — privileges objet</span>
+          <pre class="code-block"><code>GRANT SELECT, INSERT, UPDATE, DELETE ON scott.emp TO app_user;
+-- Privilege sur colonnes specifiques seulement
+GRANT UPDATE (sal, comm) ON scott.emp TO app_user;
+-- Avec droit de transmettre le privilege
+GRANT SELECT ON scott.emp TO app_user WITH GRANT OPTION;
+-- Donner a tous les utilisateurs
+GRANT SELECT ON scott.emp TO PUBLIC;</code></pre>
+
+          <span class="code-label">REVOKE</span>
+          <pre class="code-block"><code>REVOKE CREATE TABLE FROM app_user;
+REVOKE SELECT ON scott.emp FROM app_user;
+REVOKE INSERT, UPDATE, DELETE ON scott.emp FROM app_user;</code></pre>
+
+          <span class="code-label">Vues de verification</span>
+          <pre class="code-block"><code>SELECT grantee, privilege, admin_option FROM dba_sys_privs WHERE grantee = 'APP_USER';
+SELECT grantee, owner, table_name, privilege FROM dba_tab_privs WHERE grantee = 'APP_USER';
+SELECT * FROM session_privs;   -- Privileges actifs dans la session courante</code></pre>
+        </article>
+
+        <article class="panel topic-block" style="margin-top:18px">
+          <h2>3. Roles</h2>
+          <div class="callout">
+            <strong>Comment ca marche:</strong> Un role est un conteneur nomme de privileges.
+            Au lieu de donner 10 privileges individuellement a 50 utilisateurs,
+            on cree un role, on y met les privileges, puis on donne le role aux utilisateurs.
+            Un seul REVOKE du role retire tous ses privileges a l'utilisateur.
+            Oracle propose des roles predefinies: CONNECT, RESOURCE, DBA, SYSBACKUP.
+          </div>
+
+          <span class="code-label">Cycle complet d'un role</span>
+          <pre class="code-block"><code>-- Creer le role
+CREATE ROLE role_compta;
+
+-- Donner des privileges au role
+GRANT CREATE SESSION TO role_compta;
+GRANT SELECT, INSERT, UPDATE ON finance.factures TO role_compta;
+
+-- Donner le role a un utilisateur
+GRANT role_compta TO app_user;
+GRANT role_compta TO app_user WITH ADMIN OPTION;  -- Peut transmettre le role
+
+-- Retirer le role d'un utilisateur
+REVOKE role_compta FROM app_user;
+
+-- Supprimer le role
+DROP ROLE role_compta;</code></pre>
+
+          <div class="table-wrap" style="margin-top:12px">
+            <table>
+              <thead><tr><th>Role predefined</th><th>Contenu</th><th>Quand l'utiliser</th></tr></thead>
+              <tbody>
+                <tr><td><span class="mono">CONNECT</span></td><td>CREATE SESSION principalement</td><td>Connexion basique</td></tr>
+                <tr><td><span class="mono">RESOURCE</span></td><td>CREATE TABLE, SEQUENCE, PROCEDURE...</td><td>Developpeur</td></tr>
+                <tr><td><span class="mono">DBA</span></td><td>Presque tous les privileges systeme</td><td>Administrateur (a limiter)</td></tr>
+                <tr><td><span class="mono">SYSBACKUP</span></td><td>Backup et recovery sans acces aux donnees</td><td>RMAN — moindre privilege</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="callout danger" style="margin-top:12px">
+            <strong>Exam — distinction cle:</strong>
+            SYSBACKUP est un <strong>ROLE</strong> (pas un privilege systeme).
+            Il est prefere au role DBA pour RMAN: l'administrateur RMAN n'a pas besoin d'acceder aux donnees applicatives.
+            <br>WITH GRANT OPTION = transmettre un privilege <strong>objet</strong>.
+            WITH ADMIN OPTION = transmettre un privilege <strong>systeme</strong> ou un <strong>role</strong>.
+          </div>
+
+          <span class="code-label">Vues de verification</span>
+          <pre class="code-block"><code>SELECT grantee, granted_role, default_role, admin_option FROM dba_role_privs WHERE grantee = 'APP_USER';
+SELECT * FROM session_roles;   -- Roles actifs dans la session courante</code></pre>
+        </article>
+
+        <article class="panel topic-block" style="margin-top:18px">
+          <h2>4. Profils</h2>
+          <div class="callout">
+            <strong>Comment ca marche:</strong> Un profil regroupe des limites de deux categories:
+            <strong>Limites de mots de passe</strong> (toujours actives) et <strong>limites de ressources</strong>
+            (actives seulement si <span class="mono">RESOURCE_LIMIT = TRUE</span> au niveau systeme).
+            Chaque utilisateur a exactement un profil. Si aucun n'est affecte, le profil DEFAULT s'applique.
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Parametre mot de passe</th><th>Ce que ca fait</th></tr></thead>
+              <tbody>
+                <tr><td><span class="mono">FAILED_LOGIN_ATTEMPTS</span></td><td>Nb max de tentatives echouees avant verrouillage du compte</td></tr>
+                <tr><td><span class="mono">PASSWORD_LOCK_TIME</span></td><td>Duree du verrouillage en jours (UNLIMITED = permanent jusqu'au DBA)</td></tr>
+                <tr><td><span class="mono">PASSWORD_LIFE_TIME</span></td><td>Duree de validite du mot de passe en jours</td></tr>
+                <tr><td><span class="mono">PASSWORD_GRACE_TIME</span></td><td>Periode de grace apres expiration: connexion encore possible mais changement requis</td></tr>
+                <tr><td><span class="mono">PASSWORD_REUSE_TIME</span></td><td>Delai en jours avant reutilisation d'un ancien mot de passe</td></tr>
+                <tr><td><span class="mono">PASSWORD_REUSE_MAX</span></td><td>Nb de changements requis avant reutilisation d'un ancien mot de passe</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="table-wrap" style="margin-top:12px">
+            <table>
+              <thead><tr><th>Parametre ressource</th><th>Ce que ca fait</th></tr></thead>
+              <tbody>
+                <tr><td><span class="mono">SESSIONS_PER_USER</span></td><td>Nb max de sessions simultanees pour cet utilisateur</td></tr>
+                <tr><td><span class="mono">CONNECT_TIME</span></td><td>Duree max d'une session connectee (minutes)</td></tr>
+                <tr><td><span class="mono">IDLE_TIME</span></td><td>Duree max d'inactivite avant deconnexion automatique (minutes)</td></tr>
+                <tr><td><span class="mono">LOGICAL_READS_PER_SESSION</span></td><td>Nb max de lectures logiques par session</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <span class="code-label">CREATE PROFILE et affectation</span>
+          <pre class="code-block"><code>CREATE PROFILE profil_app LIMIT
+  FAILED_LOGIN_ATTEMPTS  3
+  PASSWORD_LOCK_TIME     1
+  PASSWORD_LIFE_TIME     90
+  PASSWORD_GRACE_TIME    7
+  SESSIONS_PER_USER      2
+  CONNECT_TIME           60
+  IDLE_TIME              15;
+
+-- Affecter le profil a un utilisateur
+ALTER USER app_user PROFILE profil_app;
+
+-- Activer les limites de ressources au niveau systeme (obligatoire)
+ALTER SYSTEM SET resource_limit = TRUE;
+
+-- Remettre le profil par defaut
+ALTER USER app_user PROFILE DEFAULT;</code></pre>
+
+          <div class="callout danger">
+            <strong>Quand les limites de ressources n'ont aucun effet:</strong>
+            Si <span class="mono">RESOURCE_LIMIT = FALSE</span> (defaut Oracle),
+            les parametres SESSIONS_PER_USER, CONNECT_TIME, IDLE_TIME... sont completement ignores.
+            Seules les limites de mots de passe sont toujours actives.
+            → Solution: <span class="mono">ALTER SYSTEM SET resource_limit = TRUE;</span>
+            <br><br>
+            <strong>Difference PASSWORD_LOCK_TIME / PASSWORD_LIFE_TIME:</strong>
+            LOCK_TIME = duree du verrouillage apres echecs. LIFE_TIME = duree de validite normale. Ce sont deux parametres independants.
+          </div>
+
+          <span class="code-label">Vues de verification</span>
+          <pre class="code-block"><code>SELECT profile, resource_name, limit FROM dba_profiles WHERE profile = 'PROFIL_APP';
+SELECT username, profile FROM dba_users WHERE username = 'APP_USER';</code></pre>
+        </article>
+
+        <div class="accent-band">
+          <strong>Logique exercice 1:</strong> Securite Oracle = 4 niveaux. Utilisateur (identite + tablespace + quota) → Privilege (ce qu'il peut faire) → Role (regroupement de privileges) → Profil (limites et contraintes).
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!-- EXERCICE 2 : RMAN                              -->
+    <!-- ══════════════════════════════════════════════ -->
+    <section class="section" id="ex2">
+      <div class="page-shell">
+        <div class="section-header">
+          <div>
+            <div class="section-kicker">Exercice 2</div>
+            <h2 class="section-title">RMAN — connexion, sauvegardes, recuperations, catalogue</h2>
+          </div>
+          <p class="section-note">RMAN (Recovery Manager) est l'outil Oracle integre pour toutes les operations de sauvegarde et recuperation. Il connait la structure interne de la base.</p>
+        </div>
+
+        <!-- 2a: Connexion RMAN -->
+        <article class="panel topic-block">
+          <h2>2a. Connexion RMAN</h2>
+          <div class="callout">
+            <strong>Comment ca marche:</strong> RMAN est un executable distinct de SQL*Plus.
+            On le lance depuis le shell systeme avec la commande <span class="mono">rman</span>.
+            Le mot-cle <span class="mono">TARGET</span> designe la base cible a sauvegarder.
+            <span class="mono">SYSBACKUP</span> est le role recommande: il couvre backup et recovery
+            sans donner acces aux donnees applicatives (principe du moindre privilege).
+            Sans connexion valide a une base cible, RMAN ne peut rien faire.
+          </div>
+
+          <span class="code-label">Toutes les formes de connexion</span>
+          <pre class="code-block"><code>-- Connexion locale OS authentication (le plus courant)
+rman TARGET /
+
+-- Connexion locale avec le role SYSBACKUP (recommande)
+rman TARGET "/ AS SYSBACKUP"
+
+-- Connexion distante avec mot de passe
+rman TARGET sys/password@mydb
+
+-- Depuis l'invite RMAN (apres lancement sans argument)
+rman
+CONNECT TARGET /
+CONNECT TARGET sys/password@mydb;
+
+-- Connexion avec Recovery Catalog en plus
+rman TARGET / CATALOG rcat_owner/password@catdb</code></pre>
+
+          <div class="callout danger">
+            <strong>Quand ca ne marche pas:</strong>
+            <ul class="bullet-list" style="margin-top:8px">
+              <li>ORA-01031: SYSBACKUP pas accorde → <span class="mono">GRANT SYSBACKUP TO user</span> en SQL*Plus</li>
+              <li>Base inaccessible: la base n'est pas demarree → faire <span class="mono">STARTUP</span> en SQL*Plus d'abord</li>
+              <li>ORACLE_SID mal defini: <span class="mono">export ORACLE_SID=orcl</span> (Linux) ou <span class="mono">set ORACLE_SID=orcl</span> (Windows)</li>
+              <li>Erreur TNS: le service Oracle Net n'est pas configure → verifier le listener</li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- 2b: Vues et commandes RMAN -->
+        <article class="panel topic-block" style="margin-top:18px">
+          <h2>2b. Vues et commandes de consultation RMAN</h2>
+          <div class="callout">
+            <strong>Comment ca marche:</strong> RMAN stocke l'historique de toutes ses operations
+            dans le control file (ou dans le Recovery Catalog si configure).
+            On peut interroger cet historique avec des commandes RMAN propres (LIST, REPORT, SHOW)
+            ou avec des requetes SQL sur les vues dynamiques V$.
+          </div>
+
+          <span class="code-label">Commandes RMAN de consultation</span>
+          <pre class="code-block"><code>SHOW ALL;                              -- Configuration persistante RMAN
+REPORT SCHEMA;                         -- Structure de la base (datafiles, tablespaces)
+LIST BACKUP;                           -- Toutes les sauvegardes
+LIST BACKUP SUMMARY;                   -- Resume des sauvegardes
+LIST BACKUP OF DATABASE;               -- Sauvegardes de la base entiere
+LIST BACKUP OF TABLESPACE users;       -- Sauvegardes d'un tablespace precis
+LIST COPY;                             -- Copies image disponibles
+LIST ARCHIVELOG ALL;                   -- Archived logs disponibles
+REPORT OBSOLETE;                       -- Sauvegardes obsoletes selon la retention</code></pre>
+
+          <span class="code-label">Vues V$ importantes pour RMAN</span>
+          <pre class="code-block"><code>SELECT name, value FROM v$rman_configuration;            -- Config RMAN persistante
+SELECT log_mode, flashback_on FROM v$database;            -- Mode archivelog + flashback
+SELECT current_scn FROM v$database;                       -- SCN actuel
+SELECT * FROM v$recovery_file_dest;                       -- FRA: chemin et taille
+SELECT file_type, percent_space_used FROM v$recovery_area_usage;  -- Utilisation FRA
+SELECT job_type, status, start_time FROM v$rman_backup_job_details ORDER BY start_time DESC;</code></pre>
+        </article>
+
+        <!-- 2c: Types de sauvegarde -->
+        <article class="panel topic-block" style="margin-top:18px">
+          <h2>2c. Types de sauvegarde</h2>
+          <div class="callout">
+            <strong>Prerequis pour les sauvegardes a chaud (base ouverte):</strong>
+            La base doit etre en mode <strong>ARCHIVELOG</strong>.
+            En NOARCHIVELOG, seule la sauvegarde a froid (base arretee) est possible.
+            Pour passer en ARCHIVELOG:
+            <span class="mono">SHUTDOWN IMMEDIATE; STARTUP MOUNT; ALTER DATABASE ARCHIVELOG; ALTER DATABASE OPEN;</span>
+          </div>
+
+          <h3>Whole backup (sauvegarde de toute la base)</h3>
+          <div class="callout">
+            <strong>Whole</strong> designe la <strong>portee</strong> de la sauvegarde: toute la base (tous les datafiles + control file).
+            C'est la sauvegarde la plus courante. RMAN ne copie que les blocs utilises, pas les blocs vides.
+            On peut y ajouter les archived logs avec <span class="mono">PLUS ARCHIVELOG</span> pour permettre une recuperation complete.
+          </div>
+          <pre class="code-block"><code>-- Sauvegarde de toute la base
+BACKUP DATABASE;
+
+-- Avec archived logs (recommande — permet recuperation complete)
+BACKUP DATABASE PLUS ARCHIVELOG;
+
+-- Dans un bloc RUN avec canal dedie
+RUN {
+  ALLOCATE CHANNEL c1 DEVICE TYPE DISK FORMAT '/backup/%U';
+  BACKUP DATABASE PLUS ARCHIVELOG;
+  BACKUP CURRENT CONTROLFILE;
+  DELETE OBSOLETE;
+}</code></pre>
+
+          <h3>Full backup (sauvegarde non incrementale)</h3>
+          <div class="callout">
+            <strong>Full</strong> designe le <strong>niveau</strong> (level) de la sauvegarde: elle n'est pas incrementale.
+            Un full backup copie tous les blocs utilises du fichier, sans reference a une sauvegarde precedente.
+            Par defaut, <span class="mono">BACKUP DATABASE</span> est deja un full backup.
+            <strong>Difference avec Incremental Level 0:</strong> un full backup ne peut pas servir de base pour les sauvegardes incrementales. Le level 0 peut.
+          </div>
+          <pre class="code-block"><code>-- Full backup de la base (comportement par defaut)
+BACKUP DATABASE;
+
+-- Full backup d'un tablespace specifique
+BACKUP TABLESPACE users;
+
+-- Full backup en backup set (format compresse RMAN)
+BACKUP AS BACKUPSET DATABASE;
+
+-- Full backup en copie image (restauration plus rapide, mais plus d'espace)
+BACKUP AS COPY DATABASE;
+
+-- Full backup compresse
+BACKUP AS COMPRESSED BACKUPSET DATABASE PLUS ARCHIVELOG;</code></pre>
+
+          <h3>Backup incremental</h3>
+          <div class="callout">
+            Le backup incremental ne sauvegarde que les <strong>blocs modifies</strong> depuis une sauvegarde precedente.
+            Avantage: moins de temps et d'espace. Inconvenient: restauration plus longue (rejoue les niveaux).
+            <br><br>
+            <strong>Level 0</strong>: copie tous les blocs utilises (comme un full), mais sert de <em>base de reference</em> pour les level 1.
+            <br>
+            <strong>Level 1 differentielle</strong>: blocs modifies depuis le <em>dernier incremental</em> (level 0 OU level 1).
+            Restore: level 0 + tous les level 1 differentiels successifs.
+            <br>
+            <strong>Level 1 cumulative</strong>: blocs modifies depuis le <em>dernier level 0</em> uniquement.
+            Restore: level 0 + le dernier level 1 cumulatif seulement (plus simple mais plus volumineux).
+          </div>
+          <pre class="code-block"><code>-- Level 0: base de reference (point de depart de la strategie incrementale)
+BACKUP INCREMENTAL LEVEL 0 DATABASE;
+
+-- Level 1 differentielle (depuis le dernier incremental — level 0 ou 1)
+BACKUP INCREMENTAL LEVEL 1 DATABASE;
+
+-- Level 1 cumulative (depuis le dernier level 0 seulement)
+BACKUP INCREMENTAL LEVEL 1 CUMULATIVE DATABASE;</code></pre>
+
+          <div class="table-wrap" style="margin-top:12px">
+            <table>
+              <thead><tr><th>Type</th><th>Blocs sauvegardes</th><th>Base pour increm.?</th><th>Restauration</th></tr></thead>
+              <tbody>
+                <tr><td>Full backup</td><td>Tous les blocs utilises</td><td>Non</td><td>Directe</td></tr>
+                <tr><td>Increm. Level 0</td><td>Tous les blocs utilises</td><td>Oui</td><td>Directe</td></tr>
+                <tr><td>Level 1 differentielle</td><td>Modifies depuis dernier increm.</td><td>Non</td><td>Level 0 + tous les level 1</td></tr>
+                <tr><td>Level 1 cumulative</td><td>Modifies depuis dernier level 0</td><td>Non</td><td>Level 0 + dernier level 1</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="callout danger" style="margin-top:12px">
+            <strong>Quand les sauvegardes echouent:</strong>
+            <ul class="bullet-list" style="margin-top:8px">
+              <li>Base en NOARCHIVELOG avec backup a chaud → passer en mode ARCHIVELOG d'abord</li>
+              <li>Espace insuffisant dans la FRA → <span class="mono">ALTER SYSTEM SET db_recovery_file_dest_size = 50G</span></li>
+              <li>Control file non sauvegarde → activer <span class="mono">CONFIGURE CONTROLFILE AUTOBACKUP ON</span></li>
+              <li>Permissions insuffisantes sur le repertoire → verifier les droits systeme du compte Oracle</li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- 2d: Types de recuperation -->
+        <article class="panel topic-block" style="margin-top:18px">
+          <h2>2d. Types de recuperation</h2>
+
+          <h3>Recuperation automatique d'instance (Instance Recovery)</h3>
+          <div class="callout">
+            <strong>Comment ca marche:</strong> Se produit <em>automatiquement</em> au redemarrage apres un crash
+            (SHUTDOWN ABORT, coupure de courant, panne materielle).
+            Oracle detecte que les datafiles ne sont pas synchronises avec les redo logs (checkpoint incomplet).
+            <br>
+            Phase 1 — <strong>Roll Forward</strong>: Oracle rejoue tous les redo logs pour avancer les datafiles jusqu'au dernier etat enregistre.
+            <br>
+            Phase 2 — <strong>Rollback</strong>: Oracle annule les transactions non committees au moment du crash en utilisant les segments Undo.
+            <br>
+            <strong>Aucune commande DBA n'est requise.</strong> Tout est automatique lors du STARTUP.
+          </div>
+          <pre class="code-block"><code>-- Aucune action requise: juste demarrer la base normalement
+STARTUP;
+-- Oracle detecte automatiquement le besoin de recuperation d'instance
+-- et l'effectue avant d'ouvrir la base (phase MOUNT → OPEN)</code></pre>
+
+          <h3>Recuperation complete (Complete Recovery)</h3>
+          <div class="callout">
+            <strong>Comment ca marche:</strong> On restaure les fichiers depuis la sauvegarde (RESTORE = copie physique),
+            puis on applique tous les archived redo logs disponibles pour remettre la base
+            dans son etat le plus recent possible (jusqu'au dernier commit valide).
+            La base retrouve son etat le plus recent → ouverture normale sans RESETLOGS.
+          </div>
+          <pre class="code-block"><code>-- Cas 1: perte d'un tablespace non critique (base reste ouverte)
+ALTER TABLESPACE users OFFLINE IMMEDIATE;
+
+RESTORE TABLESPACE users;
+RECOVER TABLESPACE users;
+
+ALTER TABLESPACE users ONLINE;
+
+-- Cas 2: perte du tablespace SYSTEM ou UNDO (base doit etre en MOUNT)
+SHUTDOWN ABORT;
+STARTUP MOUNT;
+
+RESTORE DATABASE;
+RECOVER DATABASE;
+
+ALTER DATABASE OPEN;       -- Recuperation complete → OPEN sans RESETLOGS</code></pre>
+
+          <h3>Recuperation incomplete / PITR (Point-In-Time Recovery)</h3>
+          <div class="callout">
+            <strong>Comment ca marche:</strong> On s'arrete volontairement a un instant specifique dans le passe
+            (avant une suppression accidentelle, une mise a jour erronee...).
+            On utilise <span class="mono">SET UNTIL</span> pour definir le point cible: une date/heure ou un SCN.
+            Apres la recuperation, la base <strong>doit imperativement</strong> etre ouverte avec
+            <span class="mono">OPEN RESETLOGS</span> (cree une nouvelle incarnation de la base).
+          </div>
+          <pre class="code-block"><code>-- PITR par timestamp (date et heure)
+SHUTDOWN IMMEDIATE;
+STARTUP MOUNT;
+
+RUN {
+  SET UNTIL TIME "TO_DATE('2026-06-06 14:30:00','YYYY-MM-DD HH24:MI:SS')";
+  RESTORE DATABASE;
+  RECOVER DATABASE;
+}
+
+ALTER DATABASE OPEN RESETLOGS;    -- OBLIGATOIRE apres tout PITR
+
+-- PITR par SCN (plus precis qu'une date)
+SHUTDOWN IMMEDIATE;
+STARTUP MOUNT;
+
+RUN {
+  SET UNTIL SCN 1500000;
+  RESTORE DATABASE;
+  RECOVER DATABASE;
+}
+
+ALTER DATABASE OPEN RESETLOGS;
+
+-- Trouver le SCN d'un instant passe
+SELECT current_scn FROM v$database;
+SELECT * FROM employees AS OF SCN 1499000;  -- Verifier l'etat avant incident</code></pre>
+
+          <div class="callout danger">
+            <strong>Quand ca echoue:</strong>
+            <ul class="bullet-list" style="margin-top:8px">
+              <li>RESTORE echoue: aucune sauvegarde → <span class="mono">LIST BACKUP</span> pour verifier ce qui est disponible</li>
+              <li>RECOVER echoue: archived logs manquants pour la periode → <span class="mono">RESTORE ARCHIVELOG</span> depuis une sauvegarde d'abord</li>
+              <li>Oubli de RESETLOGS apres PITR → ORA-01589 au tentative d'OPEN → utiliser <span class="mono">ALTER DATABASE OPEN RESETLOGS</span></li>
+              <li>Recuperation du control file perdu → demarrer en NOMOUNT, <span class="mono">RESTORE CONTROLFILE FROM AUTOBACKUP</span>, puis MOUNT</li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- 2e: Recovery Catalog -->
+        <article class="panel topic-block" style="margin-top:18px">
+          <h2>2e. Recovery Catalog (RC) — 3 etapes</h2>
+          <div class="callout">
+            <strong>Comment ca marche:</strong> Le Recovery Catalog est une base Oracle distincte
+            qui stocke les metadonnees RMAN: historique complet des sauvegardes, scripts RMAN stockes,
+            informations sur toutes les bases enregistrees.
+            Sans lui, RMAN utilise uniquement le control file (historique limite a sa taille).
+            Avec lui: historique illimite, scripts partages entre bases, gestion multi-cibles.
+          </div>
+
+          <div class="callout danger" style="margin-top:0">
+            <strong>Comparaison Control file vs Recovery Catalog:</strong><br>
+            Control file seul: simple, pas de base supplementaire, mais historique limite et pas de scripts stockes.<br>
+            Recovery Catalog: historique complet, scripts RMAN stockes, gestion multi-bases, supporte KEEP FOREVER — mais necessite une base Oracle supplementaire a administrer.
+          </div>
+
+          <h3>Etape 1 — Creer l'utilisateur sur la base catalog</h3>
+          <pre class="code-block"><code>-- Sur la base qui va heberger le catalog (pas la base cible)
+CREATE USER rcat_owner IDENTIFIED BY password
+  DEFAULT TABLESPACE rcat_ts
+  QUOTA UNLIMITED ON rcat_ts;
+
+-- Accorder le role necessaire
+GRANT RECOVERY_CATALOG_OWNER TO rcat_owner;
+GRANT CREATE SESSION TO rcat_owner;</code></pre>
+
+          <h3>Etape 2 — Creer le schema du catalog (depuis RMAN)</h3>
+          <pre class="code-block"><code>-- Connexion RMAN avec base cible ET catalog
+rman TARGET / CATALOG rcat_owner/password@catdb
+
+-- Creer le schema du catalog (une seule fois)
+CREATE CATALOG;</code></pre>
+
+          <h3>Etape 3 — Enregistrer la base cible</h3>
+          <pre class="code-block"><code>-- Enregistrer la base cible dans le catalog
+REGISTER DATABASE;
+
+-- Verifier l'enregistrement
+LIST DB_UNIQUE_NAME ALL;
+
+-- Synchroniser le catalog apres modification de structure
+RESYNC CATALOG;
+
+-- Supprimer le catalog (si necessaire)
+DROP CATALOG;</code></pre>
+
+          <div class="callout danger">
+            <strong>Quand ca ne marche pas:</strong>
+            <ul class="bullet-list" style="margin-top:8px">
+              <li>CREATE CATALOG echoue: RECOVERY_CATALOG_OWNER pas accorde → accorder le role d'abord</li>
+              <li>REGISTER DATABASE echoue: base cible non accessible → verifier la connexion TARGET</li>
+              <li>Catalog desynchronise: faire <span class="mono">RESYNC CATALOG</span> apres ajout de datafile ou modification de structure</li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- 2f: Script complet -->
+        <article class="panel topic-block" style="margin-top:18px">
+          <h2>2f. Script de restauration et recuperation</h2>
+
+          <span class="code-label">Script 1 — Recuperation complete de la base</span>
+          <pre class="code-block"><code>-- 1. Arreter la base
+SHUTDOWN ABORT;
+
+-- 2. Monter la base
+STARTUP MOUNT;
+
+-- 3. Verifier les sauvegardes disponibles
+LIST BACKUP SUMMARY;
+
+-- 4. Restaurer (copie physique depuis la sauvegarde)
+RESTORE DATABASE;
+
+-- 5. Recuperer (appliquer les archived logs)
+RECOVER DATABASE;
+
+-- 6. Ouvrir la base (recuperation complete → OPEN sans RESETLOGS)
+ALTER DATABASE OPEN;</code></pre>
+
+          <span class="code-label">Script 2 — PITR par date (recuperation incomplete)</span>
+          <pre class="code-block"><code>SHUTDOWN IMMEDIATE;
+STARTUP MOUNT;
+
+RUN {
+  SET UNTIL TIME "TO_DATE('2026-06-06 14:30:00','YYYY-MM-DD HH24:MI:SS')";
+  RESTORE DATABASE;
+  RECOVER DATABASE;
+}
+
+ALTER DATABASE OPEN RESETLOGS;   -- TOUJOURS RESETLOGS apres SET UNTIL</code></pre>
+
+          <span class="code-label">Script 3 — Recuperation du control file perdu</span>
+          <pre class="code-block"><code>-- Control file perdu: demarrer en NOMOUNT uniquement
+STARTUP NOMOUNT;
+
+RESTORE CONTROLFILE FROM AUTOBACKUP;
+
+-- Monter la base (control file restaure)
+ALTER DATABASE MOUNT;
+
+RESTORE DATABASE;
+RECOVER DATABASE;
+
+ALTER DATABASE OPEN RESETLOGS;</code></pre>
+
+          <span class="code-label">Script 4 — Recuperation d'un tablespace non critique</span>
+          <pre class="code-block"><code>-- Base reste ouverte: mettre le tablespace offline
+ALTER TABLESPACE users OFFLINE IMMEDIATE;
+
+RESTORE TABLESPACE users;
+RECOVER TABLESPACE users;
+
+ALTER TABLESPACE users ONLINE;</code></pre>
+
+          <div class="callout danger">
+            <strong>Regle absolue de sequence:</strong>
+            SHUTDOWN → MOUNT → RESTORE → RECOVER → OPEN.<br>
+            Jamais RECOVER avant RESTORE. Jamais OPEN avant RECOVER.<br>
+            Apres tout <span class="mono">SET UNTIL</span> (PITR): <span class="mono">OPEN RESETLOGS</span> obligatoire, jamais <span class="mono">OPEN</span> seul.<br>
+            Perte du control file: commencer en <span class="mono">NOMOUNT</span> (pas MOUNT).
+          </div>
+        </article>
+
+        <div class="accent-band">
+          <strong>Logique exercice 2:</strong> RMAN connait la structure Oracle → connexion avec TARGET → sauvegarde (whole/full/incremental) → en cas de panne: RESTORE (copie) puis RECOVER (applique les logs) → OPEN ou OPEN RESETLOGS selon le type de recuperation.
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!-- EXERCICE 3 : FLASHBACK                         -->
+    <!-- ══════════════════════════════════════════════ -->
+    <section class="section" id="ex3">
+      <div class="page-shell">
+        <div class="section-header">
+          <div>
+            <div class="section-kicker">Exercice 3</div>
+            <h2 class="section-title">Flashback Technology — types, fonctionnalites, roles, commandes</h2>
+          </div>
+          <p class="section-note">Flashback permet de retrouver des etats passes sans restauration de sauvegarde, en utilisant les segments Undo (pour les donnees) et les flashback logs (pour la base entiere).</p>
+        </div>
+
+        <article class="panel topic-block">
+          <h2>Vue d'ensemble — les 6 types Flashback</h2>
+          <div class="callout">
+            <strong>Mecanismes fondamentaux:</strong>
+            La plupart des Flashback utilisent les <strong>segments Undo</strong> (Oracle conserve les versions anterieures des donnees pendant UNDO_RETENTION secondes).
+            Flashback Database utilise en plus les <strong>flashback logs</strong> (images des blocs avant modification, stockees dans la FRA).
+            Flashback Drop utilise la <strong>corbeille</strong> (RECYCLEBIN) — aucun Undo requis.
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Type</th><th>Granularite</th><th>Prerequis cle</th><th>Modifie les donnees?</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Flashback Query</strong></td><td>Lignes a un instant T</td><td>UNDO_RETENTION suffisant</td><td>Non — lecture seule</td></tr>
+                <tr><td><strong>Version Query</strong></td><td>Historique complet d'une ligne</td><td>UNDO_RETENTION suffisant</td><td>Non — lecture seule</td></tr>
+                <tr><td><strong>Transaction Query</strong></td><td>Toutes ops d'une transaction + SQL d'annulation</td><td>UNDO_RETENTION + Supplemental Logging</td><td>Non</td></tr>
+                <tr><td><strong>Flashback Table</strong></td><td>Une ou plusieurs tables</td><td>UNDO_RETENTION + ROW MOVEMENT actif</td><td>Oui</td></tr>
+                <tr><td><strong>Flashback Drop</strong></td><td>Table supprimee (corbeille)</td><td>Corbeille non purgee</td><td>Oui</td></tr>
+                <tr><td><strong>Flashback Database</strong></td><td>Toute la base</td><td>ARCHIVELOG + FLASHBACK ON + FRA</td><td>Oui — OPEN RESETLOGS requis</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="panel topic-block" style="margin-top:18px">
+          <h2>1. Flashback Query (AS OF)</h2>
+          <div class="callout">
+            <strong>Role:</strong> Voir les donnees telles qu'elles existaient a un instant T dans le passe.
+            Utile pour retrouver des donnees avant une mise a jour ou suppression accidentelle.
+            La requete est <em>en lecture seule</em>: elle ne change rien dans la base.
+            On peut ensuite utiliser le resultat pour faire un INSERT et reinjecter les donnees perdues.
+          </div>
+          <pre class="code-block"><code>-- Par timestamp
+SELECT * FROM employees
+  AS OF TIMESTAMP TO_TIMESTAMP('2026-06-06 13:00:00', 'YYYY-MM-DD HH24:MI:SS');
+
+-- Par SCN
+SELECT * FROM employees AS OF SCN 1498000;
+
+-- Reinjecter des lignes supprimees accidentellement
+INSERT INTO employees
+  SELECT * FROM employees
+  AS OF TIMESTAMP (SYSTIMESTAMP - INTERVAL '2' HOUR)
+  WHERE employee_id = 1001;</code></pre>
+
+          <div class="callout danger">
+            <strong>Quand ca echoue — ORA-01555 (snapshot too old):</strong>
+            Les donnees Undo necessaires ont ete ecrases par d'autres transactions (UNDO_RETENTION trop court).
+            → Augmenter la retention: <span class="mono">ALTER SYSTEM SET undo_retention = 10800;</span> (en secondes — ici 3 heures)
+            → Ou garantir la retention: <span class="mono">ALTER TABLESPACE undotbs1 RETENTION GUARANTEE;</span>
+            <br>Verification: <span class="mono">SHOW PARAMETER undo_retention;</span>
+          </div>
+        </article>
+
+        <article class="panel topic-block" style="margin-top:18px">
+          <h2>2. Flashback Version Query (VERSIONS BETWEEN)</h2>
+          <div class="callout">
+            <strong>Role:</strong> Voir toutes les versions successives d'une ligne entre deux instants.
+            Chaque modification = une version. On recupere: qui a modifie, quand, quel type (I/U/D),
+            et l'identifiant de transaction (XID) — utile pour la Transaction Query ensuite.
+          </div>
+          <pre class="code-block"><code>-- Par timestamps
+SELECT versions_starttime, versions_endtime,
+       versions_operation, versions_xid,
+       employee_id, salary
+FROM employees
+  VERSIONS BETWEEN TIMESTAMP
+    TO_TIMESTAMP('2026-06-06 12:00:00','YYYY-MM-DD HH24:MI:SS')
+    AND
+    TO_TIMESTAMP('2026-06-06 15:00:00','YYYY-MM-DD HH24:MI:SS')
+WHERE employee_id = 100;
+
+-- Par SCN
+SELECT versions_startscn, versions_endscn, versions_operation, salary
+FROM employees
+  VERSIONS BETWEEN SCN 1400000 AND 1600000
+WHERE employee_id = 100;</code></pre>
+
+          <pre class="code-block"><code>-- Pseudo-colonnes disponibles avec VERSIONS BETWEEN
+VERSIONS_STARTTIME   -- Debut de cette version (timestamp)
+VERSIONS_ENDTIME     -- Fin de cette version
+VERSIONS_STARTSCN    -- SCN de debut
+VERSIONS_ENDSCN      -- SCN de fin
+VERSIONS_OPERATION   -- I=INSERT  U=UPDATE  D=DELETE
+VERSIONS_XID         -- Transaction ID (a utiliser avec Transaction Query)</code></pre>
+        </article>
+
+        <article class="panel topic-block" style="margin-top:18px">
+          <h2>3. Flashback Transaction Query</h2>
+          <div class="callout">
+            <strong>Role:</strong> Retrouver toutes les modifications d'une transaction specifique
+            et obtenir le SQL inverse (UNDO_SQL) pour l'annuler manuellement.
+            Workflow typique: 1) identifier le XID via Version Query → 2) interroger FLASHBACK_TRANSACTION_QUERY → 3) executer UNDO_SQL.
+            <strong>Prerequis:</strong> Supplemental Logging active.
+          </div>
+          <pre class="code-block"><code>-- Activer le Supplemental Logging (prerequis — a faire une seule fois)
+ALTER DATABASE ADD SUPPLEMENTAL LOG DATA;
+
+-- Interroger la vue avec le XID recupere depuis VERSIONS_XID
+SELECT xid, operation, start_timestamp, commit_timestamp,
+       logon_user, undo_sql
+FROM flashback_transaction_query
+WHERE xid = HEXTORAW('0002000300000076')
+ORDER BY seq DESC;
+
+-- Le champ UNDO_SQL contient le SQL inverse (ex: si DELETE → contient INSERT)
+-- Executer ce SQL pour annuler manuellement la transaction</code></pre>
+        </article>
+
+        <article class="panel topic-block" style="margin-top:18px">
+          <h2>4. Flashback Table</h2>
+          <div class="callout">
+            <strong>Role:</strong> Remettre une ou plusieurs tables dans leur etat a un instant passe,
+            sans restauration de sauvegarde. Modifie reellement les donnees.
+            <strong>Prerequis obligatoire:</strong> ROW MOVEMENT active sur la table.
+            Sans cela, Oracle ne peut pas repositionner les lignes lors du flashback.
+          </div>
+          <pre class="code-block"><code>-- Prerequis: activer ROW MOVEMENT
+ALTER TABLE employees ENABLE ROW MOVEMENT;
+
+-- Flashback par timestamp
+FLASHBACK TABLE employees
+  TO TIMESTAMP TO_TIMESTAMP('2026-06-06 13:00:00','YYYY-MM-DD HH24:MI:SS');
+
+-- Flashback par SCN
+FLASHBACK TABLE employees TO SCN 1498000;
+
+-- Plusieurs tables simultanement (coheference referentielle preservee)
+FLASHBACK TABLE employees, departments
+  TO TIMESTAMP TO_TIMESTAMP('2026-06-06 13:00:00','YYYY-MM-DD HH24:MI:SS');
+
+-- Vers un restore point nomme
+FLASHBACK TABLE employees TO RESTORE POINT avant_maj;</code></pre>
+
+          <div class="callout danger">
+            <strong>Quand ca echoue:</strong>
+            ORA-08189: ROW MOVEMENT non actif → <span class="mono">ALTER TABLE ... ENABLE ROW MOVEMENT</span><br>
+            ORA-01555: periode trop ancienne → augmenter UNDO_RETENTION<br>
+            Contraintes d'integrite bloquent: flashback toutes les tables liees ensemble simultanement
+          </div>
+        </article>
+
+        <article class="panel topic-block" style="margin-top:18px">
+          <h2>5. Flashback Drop (Corbeille)</h2>
+          <div class="callout">
+            <strong>Role:</strong> Recuperer une table supprimee par erreur.
+            Oracle ne supprime pas immediatement les tables avec DROP TABLE:
+            il les renomme en <span class="mono">BIN$...</span> et les conserve dans la RECYCLEBIN.
+            Flashback Drop restaure la table depuis la corbeille.
+            <strong>Echoue si:</strong> la table a ete supprimee avec <span class="mono">DROP TABLE ... PURGE</span>.
+          </div>
+          <pre class="code-block"><code>-- Voir le contenu de la corbeille
+SELECT object_name, original_name, type, droptime FROM recyclebin ORDER BY droptime DESC;
+SELECT owner, object_name, original_name FROM dba_recyclebin;  -- Toutes les corbeilles (DBA)
+
+-- Restaurer sous le nom d'origine
+FLASHBACK TABLE employees TO BEFORE DROP;
+
+-- Restaurer en renommant
+FLASHBACK TABLE employees TO BEFORE DROP RENAME TO employees_restored;
+
+-- Si plusieurs versions du meme nom dans la corbeille: utiliser le nom BIN$
+FLASHBACK TABLE "BIN$xqTpY+9bQdugQKjH0rHKhA==$0" TO BEFORE DROP;
+
+-- Gestion de la corbeille
+PURGE RECYCLEBIN;                 -- Vider la corbeille de la session
+PURGE TABLE employees;            -- Supprimer une table specifique de la corbeille
+DROP TABLE employees PURGE;       -- Supprimer sans passer par la corbeille
+
+ALTER SYSTEM SET recyclebin = ON;   -- Activer la corbeille (defaut ON)
+SHOW PARAMETER recyclebin;</code></pre>
+        </article>
+
+        <article class="panel topic-block" style="margin-top:18px">
+          <h2>6. Flashback Database</h2>
+          <div class="callout">
+            <strong>Role:</strong> Revenir a un etat passe de <em>toute la base</em>.
+            Beaucoup plus rapide qu'un PITR RMAN car utilise les <strong>flashback logs</strong>
+            (images des blocs avant modification, dans la FRA) au lieu de restaurer une sauvegarde complete.
+            <strong>Prerequis:</strong> mode ARCHIVELOG + Flashback Database ON + FRA configuree.
+          </div>
+
+          <span class="code-label">Activer Flashback Database (prerequis — une seule fois)</span>
+          <pre class="code-block"><code>-- Configurer la FRA si pas deja fait
+ALTER SYSTEM SET db_recovery_file_dest = '/u01/app/oracle/fra';
+ALTER SYSTEM SET db_recovery_file_dest_size = 20G;
+
+-- Activer Flashback Database (base doit etre en MOUNT)
+SHUTDOWN IMMEDIATE;
+STARTUP MOUNT;
+ALTER DATABASE FLASHBACK ON;
+ALTER DATABASE OPEN;
+
+-- Verifier
+SELECT flashback_on FROM v$database;
+
+-- Configurer la retention des flashback logs (defaut 1440 min = 24h)
+ALTER SYSTEM SET db_flashback_retention_target = 2880;  -- 48 heures</code></pre>
+
+          <span class="code-label">Utiliser Flashback Database</span>
+          <pre class="code-block"><code>SHUTDOWN IMMEDIATE;
+STARTUP MOUNT;
+
+-- Par timestamp
+FLASHBACK DATABASE TO TIMESTAMP
+  TO_TIMESTAMP('2026-06-06 12:00:00','YYYY-MM-DD HH24:MI:SS');
+
+-- Ou par SCN
+FLASHBACK DATABASE TO SCN 1400000;
+
+-- Ou vers un restore point nomme
+FLASHBACK DATABASE TO RESTORE POINT avant_migration;
+
+-- Ouvrir la base avec RESETLOGS (obligatoire)
+ALTER DATABASE OPEN RESETLOGS;</code></pre>
+
+          <div class="callout danger">
+            <strong>Quand ca ne marche pas:</strong>
+            <ul class="bullet-list" style="margin-top:8px">
+              <li>FLASHBACK DATABASE OFF → activer avec <span class="mono">ALTER DATABASE FLASHBACK ON</span> en mode MOUNT</li>
+              <li>FRA non configuree → definir <span class="mono">DB_RECOVERY_FILE_DEST</span> et <span class="mono">DB_RECOVERY_FILE_DEST_SIZE</span></li>
+              <li>Flashback logs insuffisants (point trop ancien) → augmenter <span class="mono">DB_FLASHBACK_RETENTION_TARGET</span></li>
+              <li>Base en NOARCHIVELOG → passer en mode ARCHIVELOG d'abord</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="panel topic-block" style="margin-top:18px">
+          <h2>7. Restore Points</h2>
+          <div class="callout">
+            <strong>Role:</strong> Un restore point est un <em>alias nomme</em> associe a un SCN precis.
+            Permet de marquer un point avant une operation risquee et d'y revenir avec un nom clair.
+            <br><br>
+            <strong>Restore point normal:</strong> valide tant que les donnees Undo ou flashback logs necessaires sont disponibles.
+            <br>
+            <strong>Guaranteed Restore Point:</strong> Oracle garantit que les flashback logs ne seront jamais ecrases.
+            Toujours disponible jusqu'a suppression explicite — mais remplit progressivement la FRA.
+          </div>
+          <pre class="code-block"><code>-- Creer un restore point normal
+CREATE RESTORE POINT avant_migration;
+
+-- Creer un guaranteed restore point (necessite Flashback Database ON)
+CREATE RESTORE POINT avant_migration GUARANTEE FLASHBACK DATABASE;
+
+-- Voir les restore points disponibles
+SELECT name, scn, time, guarantee_flashback_database FROM v$restore_point;
+
+-- Utiliser pour Flashback Database
+FLASHBACK DATABASE TO RESTORE POINT avant_migration;
+
+-- Utiliser pour Flashback Table
+FLASHBACK TABLE employees TO RESTORE POINT avant_migration;
+
+-- Supprimer apres usage (IMPORTANT — libere l'espace FRA)
+DROP RESTORE POINT avant_migration;</code></pre>
+
+          <div class="callout danger">
+            <strong>Guaranteed Restore Point et espace FRA:</strong>
+            Tant qu'il existe, Oracle ne peut pas ecraser les flashback logs associes.
+            Si on oublie de le supprimer, la FRA se remplit progressivement et bloque les sauvegardes.
+            → Toujours supprimer le guaranteed restore point apres que l'operation risquee s'est bien passee.
+          </div>
+        </article>
+
+        <div class="accent-band">
+          <strong>Logique exercice 3:</strong> Flashback = recuperation sans restauration. Undo → Query/Version/Transaction/Table. Corbeille → Drop. Flashback logs → Database. Plus la granularite est large (base entiere), plus les prerequis sont importants (ARCHIVELOG + FLASHBACK ON + FRA).
+        </div>
+
+        <div class="revision-banner" style="margin-top:18px">
+          <strong>Resume des prerequis critiques par type Flashback:</strong>
+          Query/Version → UNDO_RETENTION suffisant.
+          Transaction → + Supplemental Logging (ALTER DATABASE ADD SUPPLEMENTAL LOG DATA).
+          Table → + ENABLE ROW MOVEMENT sur la table.
+          Drop → corbeille non purgee (pas de PURGE).
+          Database → ARCHIVELOG + ALTER DATABASE FLASHBACK ON + FRA configuree.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="page-shell">
+      <div class="footer-card">Resume Final Examen — Structure 3 exercices, toutes les commandes, tous les prerequis et les cas d'echec expliques.</div>
+    </div>
+  </footer>
+  <script src="highlight.js"></script>
+</body>
+</html>
